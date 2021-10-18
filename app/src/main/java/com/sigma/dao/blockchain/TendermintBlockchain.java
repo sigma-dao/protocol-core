@@ -1,4 +1,4 @@
-package com.sigma.dao;
+package com.sigma.dao.blockchain;
 
 import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
@@ -14,13 +14,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class KVStoreApp extends tendermint.abci.ABCIApplicationGrpc.ABCIApplicationImplBase {
+public class TendermintBlockchain extends tendermint.abci.ABCIApplicationGrpc.ABCIApplicationImplBase {
 
-    private Environment env;
+    private final Environment env;
     private Transaction txn = null;
     private Store store = null;
 
-    KVStoreApp(Environment env) {
+    public TendermintBlockchain(Environment env) {
         this.env = env;
     }
 
