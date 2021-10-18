@@ -16,29 +16,26 @@ buildscript {
 }
 
 plugins {
-    // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
     id 'com.google.protobuf' version '0.8.8'
 }
 
 repositories {
-    // Use Maven Central for resolving dependencies.
     mavenCentral()
 }
 
 dependencies {
-    // Use JUnit test framework.
     testImplementation 'junit:junit:4.13'
-
-    // This dependency is used by the application.
     implementation 'com.google.guava:guava:29.0-jre'
-
     implementation 'io.grpc:grpc-protobuf:1.22.1'
     implementation 'io.grpc:grpc-netty-shaded:1.22.1'
     implementation 'io.grpc:grpc-stub:1.22.1'
-
     implementation 'javax.annotation:javax.annotation-api:1.3.2'
-
+    implementation 'org.jetbrains.xodus:xodus-environment:1.3.91'
+    implementation 'org.slf4j:slf4j-api:1.7.32'
+    implementation 'org.slf4j:slf4j-simple:1.7.32'
+    compileOnly 'org.projectlombok:lombok:1.18.22'
+    annotationProcessor 'org.projectlombok:lombok:1.18.22'
 }
 
 sourceSets {
@@ -64,6 +61,5 @@ protobuf {
 }
 
 application {
-    // Define the main class for the application.
     mainClass = 'com.sigma.dao.App'
 }

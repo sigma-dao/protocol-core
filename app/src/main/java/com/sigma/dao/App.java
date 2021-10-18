@@ -3,12 +3,19 @@
  */
 package com.sigma.dao;
 
-public class App {
-    public String getGreeting() {
-        return "Hello World!";
-    }
+import jetbrains.exodus.env.Environment;
+import jetbrains.exodus.env.Environments;
 
-    public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+import java.io.IOException;
+
+public class App {
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        try (Environment env = Environments.newInstance("tmp/storage")) {
+            var app = new KVStoreApp(env);
+            var server = new GrpcServer(app, 26658);
+            server.start();
+            server.blockUntilShutdown();
+        }
     }
 }
