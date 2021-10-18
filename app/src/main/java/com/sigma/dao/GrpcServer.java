@@ -22,7 +22,7 @@ public class GrpcServer {
 
     void start() throws IOException {
         server.start();
-        log.info("gROC server started, listening on {}", this.port);
+        log.info("gRPC server started, listening on {}", this.port);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             log.info("shutting down gRPC server since JVM is shutting down");
             GrpcServer.this.stop();

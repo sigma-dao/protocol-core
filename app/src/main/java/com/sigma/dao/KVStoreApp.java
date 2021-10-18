@@ -37,7 +37,7 @@ public class KVStoreApp extends tendermint.abci.ABCIApplicationGrpc.ABCIApplicat
         responseObserver.onNext(resp);
         responseObserver.onCompleted();
     }
-    
+
     @Override
     public void echo(Types.RequestEcho request, StreamObserver<tendermint.abci.Types.ResponseEcho> responseObserver) {
         var resp = Types.ResponseEcho.newBuilder().build();
