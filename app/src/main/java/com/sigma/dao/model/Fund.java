@@ -19,7 +19,7 @@ public class Fund {
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private UUID id;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subscription_asset_id")
+    @JoinColumn(name = "subscription_asset_id", nullable = false)
     private Asset subscriptionAsset;
     @Column(name = "minimum_subscription", nullable = false)
     private Long minimumSubscription;

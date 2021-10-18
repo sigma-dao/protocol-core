@@ -21,10 +21,10 @@ public class Forecast {
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private UUID id;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "market_id")
+    @JoinColumn(name = "market_id", nullable = false)
     private Market market;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "analyst_id")
+    @JoinColumn(name = "analyst_id", nullable = false)
     private Analyst analyst;
     @Column(name = "forecast_time", nullable = false)
     private Long forecastTime = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
