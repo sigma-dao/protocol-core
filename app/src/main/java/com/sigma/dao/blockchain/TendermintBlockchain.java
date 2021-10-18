@@ -1,32 +1,43 @@
 package com.sigma.dao.blockchain;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.ByteString;
+import com.sigma.dao.blockchain.constant.TendermintTransaction;
 import com.sigma.dao.error.exception.ProtocolException;
+import com.sigma.dao.model.Fund;
+import com.sigma.dao.response.ErrorResponse;
+import com.sigma.dao.service.FundService;
 import com.sigma.dao.service.NetworkConfigService;
 import io.grpc.stub.StreamObserver;
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.env.*;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import tendermint.abci.Types;
 
-import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
+@Slf4j
 @Component
 public class TendermintBlockchain extends tendermint.abci.ABCIApplicationGrpc.ABCIApplicationImplBase {
 
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
     private final NetworkConfigService networkConfigService;
+    private final FundService fundService;
 
     private final Environment env = Environments.newInstance("tmp/storage");
     private Transaction txn = null;
     private Store store = null;
 
-    public TendermintBlockchain(NetworkConfigService networkConfigService) {
+    public TendermintBlockchain(NetworkConfigService networkConfigService, FundService fundService) {
         this.networkConfigService = networkConfigService;
+        this.fundService = fundService;
     }
 
     @Override
@@ -58,10 +69,8 @@ public class TendermintBlockchain extends tendermint.abci.ABCIApplicationGrpc.AB
 
     @Override
     public void checkTx(Types.RequestCheckTx req, StreamObserver<Types.ResponseCheckTx> responseObserver) {
-        var tx = req.getTx();
-        int code = validate(tx);
         var resp = Types.ResponseCheckTx.newBuilder()
-                .setCode(code)
+                .setCode(0)
                 .setGasWanted(1)
                 .build();
         responseObserver.onNext(resp);
@@ -80,16 +89,38 @@ public class TendermintBlockchain extends tendermint.abci.ABCIApplicationGrpc.AB
     @Override
     public void deliverTx(Types.RequestDeliverTx req, StreamObserver<Types.ResponseDeliverTx> responseObserver) {
         var tx = req.getTx();
-        int code = validate(tx);
-        if (code == 0) {
-            List<byte[]> parts = split(tx, '=');
-            var key = new ArrayByteIterable(parts.get(0));
-            var value = new ArrayByteIterable(parts.get(1));
-            store.put(txn, key, value);
+        String result;
+        Types.ResponseDeliverTx.Builder builder = Types.ResponseDeliverTx.newBuilder();
+        Types.ResponseDeliverTx resp;
+        try {
+            JSONObject jsonObject = new JSONObject(new String(Base64.getDecoder().decode(tx.toStringUtf8())));
+            TendermintTransaction transaction = TendermintTransaction.valueOf(jsonObject.getString("tx"));
+            if (transaction.equals(TendermintTransaction.CREATE_FUND)) {
+                try {
+                    Fund fund = objectMapper.readValue(jsonObject.getJSONObject("payload").toString(), Fund.class);
+                    fund = fundService.create(fund);
+                    result = objectMapper.writeValueAsString(fund);
+                    resp = builder.setCode(0).setLog(result).build();
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                    String errorJson = objectMapper.writeValueAsString(new ErrorResponse().setCode(e.getMessage()));
+                    resp = builder.setCode(1).setLog(errorJson).build();
+                }
+            } else {
+                String errorJson = objectMapper.writeValueAsString(new ErrorResponse()
+                        .setCode(String.format("Unsupported tx: %s", transaction)));
+                resp = builder.setCode(1).setLog(errorJson).build();
+            }
+        } catch(Exception e) {
+            String errorJson = "{}";
+            try {
+                errorJson = objectMapper.writeValueAsString(new ErrorResponse()
+                        .setCode(String.format("Unknown error: %s", e.getMessage())));
+            } catch(Exception e2) {
+                log.error(e2.getMessage(), e2);
+            }
+            resp = builder.setCode(1).setLog(errorJson).build();
         }
-        var resp = Types.ResponseDeliverTx.newBuilder()
-                .setCode(code)
-                .build();
         responseObserver.onNext(resp);
         responseObserver.onCompleted();
     }
@@ -107,6 +138,7 @@ public class TendermintBlockchain extends tendermint.abci.ABCIApplicationGrpc.AB
     @Override
     public void endBlock(Types.RequestEndBlock req, StreamObserver<Types.ResponseEndBlock> responseObserver) {
         var resp = Types.ResponseEndBlock.newBuilder().build();
+        // TODO - scheduled stuff can happen here at the end of the block
         responseObserver.onNext(resp);
         responseObserver.onCompleted();
     }
@@ -125,23 +157,6 @@ public class TendermintBlockchain extends tendermint.abci.ABCIApplicationGrpc.AB
         }
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
-    }
-
-    private int validate(ByteString tx) {
-        List<byte[]> parts = split(tx, '=');
-        if (parts.size() != 2) {
-            return 1;
-        }
-        byte[] key = parts.get(0);
-        byte[] value = parts.get(1);
-
-        // check if the same key=value already exists
-        var stored = getPersistedValue(key);
-        if (stored != null && Arrays.equals(stored, value)) {
-            return 2;
-        }
-
-        return 0;
     }
 
     private List<byte[]> split(ByteString tx, char separator) {

@@ -1,34 +1,42 @@
 package com.sigma.dao.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sigma.dao.blockchain.TendermintClient;
+import com.sigma.dao.blockchain.constant.TendermintQuery;
+import com.sigma.dao.blockchain.constant.TendermintTransaction;
 import com.sigma.dao.model.Fund;
-import com.sigma.dao.service.FundService;
+import lombok.SneakyThrows;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/fund")
 public class FundController {
 
-    private final FundService fundService;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public FundController(FundService fundService) {
-        this.fundService = fundService;
+    private final TendermintClient tendermintClient;
+
+    public FundController(TendermintClient tendermintClient) {
+        this.tendermintClient = tendermintClient;
     }
 
+    @SneakyThrows
     @PostMapping
-    public ResponseEntity<Fund> create(@RequestBody Fund fund) {
-        return ResponseEntity.ok(fundService.create(fund));
+    public ResponseEntity<String> create(@RequestBody Fund fund) {
+        return ResponseEntity.ok(tendermintClient.write(
+                TendermintTransaction.CREATE_FUND, objectMapper.writeValueAsString(fund)));
     }
 
+    @SneakyThrows
     @PutMapping
-    public ResponseEntity<Fund> update(@RequestBody Fund fund) {
-        return ResponseEntity.ok(fundService.update(fund));
+    public ResponseEntity<String> update(@RequestBody Fund fund) {
+        return ResponseEntity.ok(tendermintClient.write(
+                TendermintTransaction.UPDATE_FUND, objectMapper.writeValueAsString(fund)));
     }
 
     @GetMapping
-    public ResponseEntity<List<Fund>> get() {
-        return ResponseEntity.ok(fundService.get());
+    public ResponseEntity<String> get() {
+        return ResponseEntity.ok(tendermintClient.query(TendermintQuery.GET_FUNDS));
     }
 }
