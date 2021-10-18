@@ -17,6 +17,7 @@ buildscript {
 
 plugins {
     id 'application'
+    id 'jacoco'
     id 'com.google.protobuf' version '0.8.8'
 }
 
@@ -44,6 +45,33 @@ dependencies {
 
 test {
     useJUnit()
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+}
+
+jacoco {
+    toolVersion = "0.8.7"
+    reportsDirectory = layout.buildDirectory.dir('coverage')
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = false
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    '**/tendermint/**',
+                    '**/com/google/**',
+                    '**/com/sigma/dao/model/**'
+            ])
+        }))
+    }
 }
 
 sourceSets {
