@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -317,5 +318,13 @@ public class FundServiceTest {
                 .setId(UUID.randomUUID())
                 .setActivationDate(activationDate));
         Assertions.assertNotNull(fund);
+    }
+
+    @Test
+    public void testGetFunds() {
+        UUID id = UUID.randomUUID();
+        Mockito.when(fundRepository.findAll()).thenReturn(List.of(new Fund().setId(id)));
+        List<Fund> funds = fundService.get();
+        Assertions.assertEquals(id, funds.get(0).getId());
     }
 }

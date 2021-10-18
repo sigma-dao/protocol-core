@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -22,6 +23,15 @@ public class FundService {
                        NetworkConfigService networkConfigService) {
         this.fundRepository = fundRepository;
         this.networkConfigService = networkConfigService;
+    }
+
+    /**
+     * Returns all of the {@link Fund}s
+     *
+     * @return a {@link List} of {@link Fund}s
+     */
+    public List<Fund> get() {
+        return this.fundRepository.findAll();
     }
 
     /**
