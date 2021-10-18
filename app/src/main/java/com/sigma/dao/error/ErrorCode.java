@@ -9,4 +9,10 @@ public final class ErrorCode {
     public static final String E0006 = "Subscription asset is a mandatory field.";
     public static final String E0007 = "Type is a mandatory field.";
     public static final String E0008 = "ID is a mandatory field.";
+    public static final String E0009 = "Fund cannot be found with specified ID.";
+    public static final String E0010 = "Fund can only be updated when status = PROPOSED";
+    public static final String E0011 = "Fund activation date cannot be changed.";
+    public static final String E0012 = "Activation date is a mandatory field.";
+    public static final String E0013 = "Activation date is too soon.";
+    public static final String E0014 = "Fund status cannot be changed.";
 }

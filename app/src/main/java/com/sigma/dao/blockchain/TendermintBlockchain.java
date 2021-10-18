@@ -1,10 +1,14 @@
 package com.sigma.dao.blockchain;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.protobuf.ByteString;
+import com.sigma.dao.error.exception.ProtocolException;
+import com.sigma.dao.service.NetworkConfigService;
 import io.grpc.stub.StreamObserver;
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.env.*;
+import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import tendermint.abci.Types;
 
@@ -15,15 +19,27 @@ import java.util.List;
 @Component
 public class TendermintBlockchain extends tendermint.abci.ABCIApplicationGrpc.ABCIApplicationImplBase {
 
+    private final NetworkConfigService networkConfigService;
+
     private final Environment env = Environments.newInstance("tmp/storage");
     private Transaction txn = null;
     private Store store = null;
 
+    public TendermintBlockchain(NetworkConfigService networkConfigService) {
+        this.networkConfigService = networkConfigService;
+    }
+
     @Override
     public void initChain(Types.RequestInitChain req, StreamObserver<Types.ResponseInitChain> responseObserver) {
         var resp = Types.ResponseInitChain.newBuilder().build();
-        responseObserver.onNext(resp);
-        responseObserver.onCompleted();
+        final JSONObject appState = new JSONObject(req.getAppStateBytes().toStringUtf8());
+        try {
+            networkConfigService.initializeNetworkConfig(appState);
+            responseObserver.onNext(resp);
+            responseObserver.onCompleted();
+        } catch (JsonProcessingException e) {
+            responseObserver.onError(new ProtocolException(e.getMessage()));
+        }
     }
 
     @Override

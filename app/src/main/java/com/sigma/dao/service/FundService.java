@@ -3,18 +3,25 @@ package com.sigma.dao.service;
 import com.sigma.dao.error.ErrorCode;
 import com.sigma.dao.error.exception.ProtocolException;
 import com.sigma.dao.model.Fund;
+import com.sigma.dao.model.constant.FundStatus;
 import com.sigma.dao.model.repository.FundRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Slf4j
 @Service
 public class FundService {
 
     private final FundRepository fundRepository;
+    private final NetworkConfigService networkConfigService;
 
-    public FundService(FundRepository fundRepository) {
+    public FundService(FundRepository fundRepository,
+                       NetworkConfigService networkConfigService) {
         this.fundRepository = fundRepository;
+        this.networkConfigService = networkConfigService;
     }
 
     /**
@@ -25,7 +32,14 @@ public class FundService {
      * @return the new {@link Fund}
      */
     public Fund create(final Fund fund) {
-        return save(fund);
+        validate(fund);
+        long timestamp = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        long diff = fund.getActivationDate() - timestamp;
+        if(diff < networkConfigService.get().getMinFundActivationTime()) {
+            throw new ProtocolException(ErrorCode.E0013);
+        }
+        fund.setStatus(FundStatus.PROPOSED);
+        return fundRepository.save(fund);
     }
 
     /**
@@ -39,17 +53,17 @@ public class FundService {
         if(fund.getId() == null) {
             throw new ProtocolException(ErrorCode.E0008);
         }
-        return save(fund);
-    }
-
-    /**
-     * Save a {@link Fund} to the database
-     *
-     * @param fund the {@link Fund} instance
-     *
-     * @return the updated {@link Fund}
-     */
-    private Fund save(final Fund fund) {
+        Fund currentFund = fundRepository.findById(fund.getId())
+                .orElseThrow(() -> new ProtocolException(ErrorCode.E0009));
+        if(!currentFund.getStatus().equals(FundStatus.PROPOSED)) {
+            throw new ProtocolException(ErrorCode.E0010);
+        }
+        if(!fund.getActivationDate().equals(currentFund.getActivationDate())) {
+            throw new ProtocolException(ErrorCode.E0011);
+        }
+        if(!fund.getStatus().equals(currentFund.getStatus())) {
+            throw new ProtocolException(ErrorCode.E0014);
+        }
         validate(fund);
         return fundRepository.save(fund);
     }
@@ -80,6 +94,9 @@ public class FundService {
         }
         if(fund.getType() == null) {
             throw new ProtocolException(ErrorCode.E0007);
+        }
+        if(fund.getActivationDate() == null) {
+            throw new ProtocolException(ErrorCode.E0012);
         }
     }
 }
