@@ -24,6 +24,26 @@ public class KVStoreApp extends tendermint.abci.ABCIApplicationGrpc.ABCIApplicat
         this.env = env;
     }
 
+    @Override
+    public void initChain(Types.RequestInitChain req, StreamObserver<Types.ResponseInitChain> responseObserver) {
+        var resp = Types.ResponseInitChain.newBuilder().build();
+        responseObserver.onNext(resp);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void info(Types.RequestInfo request, StreamObserver<tendermint.abci.Types.ResponseInfo> responseObserver) {
+        var resp = Types.ResponseInfo.newBuilder().build();
+        responseObserver.onNext(resp);
+        responseObserver.onCompleted();
+    }
+    
+    @Override
+    public void echo(Types.RequestEcho request, StreamObserver<tendermint.abci.Types.ResponseEcho> responseObserver) {
+        var resp = Types.ResponseEcho.newBuilder().build();
+        responseObserver.onNext(resp);
+        responseObserver.onCompleted();
+    }
 
     @Override
     public void checkTx(Types.RequestCheckTx req, StreamObserver<Types.ResponseCheckTx> responseObserver) {
@@ -69,6 +89,13 @@ public class KVStoreApp extends tendermint.abci.ABCIApplicationGrpc.ABCIApplicat
         var resp = Types.ResponseCommit.newBuilder()
                 .setData(ByteString.copyFrom(new byte[8]))
                 .build();
+        responseObserver.onNext(resp);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void endBlock(Types.RequestEndBlock req, StreamObserver<Types.ResponseEndBlock> responseObserver) {
+        var resp = Types.ResponseEndBlock.newBuilder().build();
         responseObserver.onNext(resp);
         responseObserver.onCompleted();
     }
