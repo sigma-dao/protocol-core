@@ -3,7 +3,6 @@ package com.sigma.dao.grpc;
 import com.sigma.dao.blockchain.TendermintBlockchain;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
-import jetbrains.exodus.env.Environments;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,11 +19,16 @@ public class GrpcServer {
     @Value("${grpc.port}")
     private Integer port;
 
+    private final TendermintBlockchain tendermintBlockchain;
+
+    public GrpcServer(TendermintBlockchain tendermintBlockchain) {
+        this.tendermintBlockchain = tendermintBlockchain;
+    }
+
     @PostConstruct
     private void init() {
-        TendermintBlockchain service = new TendermintBlockchain(Environments.newInstance("tmp/storage"));
         this.server = ServerBuilder.forPort(port)
-                .addService(service)
+                .addService(tendermintBlockchain)
                 .build();
     }
 

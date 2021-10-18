@@ -4,25 +4,20 @@ import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
-import jetbrains.exodus.env.Environment;
-import jetbrains.exodus.env.Store;
-import jetbrains.exodus.env.StoreConfig;
-import jetbrains.exodus.env.Transaction;
+import jetbrains.exodus.env.*;
+import org.springframework.stereotype.Component;
 import tendermint.abci.Types;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+@Component
 public class TendermintBlockchain extends tendermint.abci.ABCIApplicationGrpc.ABCIApplicationImplBase {
 
-    private final Environment env;
+    private final Environment env = Environments.newInstance("tmp/storage");
     private Transaction txn = null;
     private Store store = null;
-
-    public TendermintBlockchain(Environment env) {
-        this.env = env;
-    }
 
     @Override
     public void initChain(Types.RequestInitChain req, StreamObserver<Types.ResponseInitChain> responseObserver) {
