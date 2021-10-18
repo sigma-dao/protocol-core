@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Data
 @Entity
-@Table(name="market")
+@Table(name = "sigma_market")
 @Accessors(chain = true)
 public class Market {
     @Id
