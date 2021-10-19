@@ -10,19 +10,18 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.util.UUID;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @Table(name = "sigma_fund")
 @Accessors(chain = true)
-public class Fund extends NetworkEntity {
+public class Fund {
     @Id
     @Column(name = "id", updatable = false, nullable = false)
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private UUID id;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subscription_asset_id", nullable = true)
+    @JoinColumn(name = "subscription_asset_id", nullable = false)
     private Asset subscriptionAsset;
     @Column(name = "minimum_subscription", nullable = false)
     private Long minimumSubscription;

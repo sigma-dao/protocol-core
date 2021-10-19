@@ -9,12 +9,11 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.util.UUID;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @Table(name = "sigma_asset")
 @Accessors(chain = true)
-public class Asset extends NetworkEntity {
+public class Asset {
     @Id
     @Column(name = "id", updatable = false, nullable = false)
     @GeneratedValue(generator = "UUID")

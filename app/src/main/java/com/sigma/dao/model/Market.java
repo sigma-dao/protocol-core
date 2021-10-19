@@ -8,12 +8,11 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.util.UUID;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @Table(name = "sigma_market")
 @Accessors(chain = true)
-public class Market extends NetworkEntity {
+public class Market {
     @Id
     @Column(name = "id", updatable = false, nullable = false)
     @GeneratedValue(generator = "UUID")

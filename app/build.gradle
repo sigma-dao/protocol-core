@@ -99,5 +99,5 @@ protobuf {
 }
 
 application {
-    mainClass = 'com.sigma.dao.App'
+    mainClass = 'com.sigma.dao.SigmaDAO'
 }

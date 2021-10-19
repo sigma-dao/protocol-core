@@ -9,12 +9,11 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import java.util.UUID;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @Table(name = "sigma_network_config")
 @Accessors(chain = true)
-public class NetworkConfig extends NetworkEntity {
+public class NetworkConfig {
     @Id
     @JsonIgnore
     @Column(name = "id", updatable = false, nullable = false)

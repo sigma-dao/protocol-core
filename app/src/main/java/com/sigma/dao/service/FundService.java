@@ -97,9 +97,9 @@ public class FundService {
         if(fund.getRedemptionFrequency() == null) {
             throw new ProtocolException(ErrorCode.E0005);
         }
-//        if(fund.getSubscriptionAsset() == null) {
-//            throw new ProtocolException(ErrorCode.E0006);
-//        }
+        if(fund.getSubscriptionAsset() == null) {
+            throw new ProtocolException(ErrorCode.E0006);
+        }
         if(fund.getType() == null) {
             throw new ProtocolException(ErrorCode.E0007);
         }
