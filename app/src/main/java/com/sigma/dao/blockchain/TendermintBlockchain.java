@@ -1,12 +1,10 @@
 package com.sigma.dao.blockchain;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.ByteString;
 import com.sigma.dao.constant.TendermintQuery;
 import com.sigma.dao.constant.TendermintTransaction;
 import com.sigma.dao.error.exception.ProtocolException;
-import com.sigma.dao.service.FundService;
 import com.sigma.dao.service.NetworkConfigService;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
@@ -21,20 +19,14 @@ import java.util.Base64;
 @Component
 public class TendermintBlockchain extends tendermint.abci.ABCIApplicationGrpc.ABCIApplicationImplBase {
 
-    private final ObjectMapper objectMapper;
     private final NetworkConfigService networkConfigService;
-    private final FundService fundService;
     private final TendermintTransactionHandler tendermintTransactionHandler;
     private final TendermintQueryHandler tendermintQueryHandler;
 
-    public TendermintBlockchain(ObjectMapper objectMapper,
-                                NetworkConfigService networkConfigService,
-                                FundService fundService,
+    public TendermintBlockchain(NetworkConfigService networkConfigService,
                                 TendermintTransactionHandler tendermintTransactionHandler,
                                 TendermintQueryHandler tendermintQueryHandler) {
-        this.objectMapper = objectMapper;
         this.networkConfigService = networkConfigService;
-        this.fundService = fundService;
         this.tendermintTransactionHandler = tendermintTransactionHandler;
         this.tendermintQueryHandler = tendermintQueryHandler;
     }
