@@ -146,7 +146,9 @@ public class FundServiceTest {
     @Test
     public void testCreateFundInvalidActivationDate() {
         UUID id = UUID.randomUUID();
+        long ts = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
         Mockito.when(fundRepository.save(Mockito.any(Fund.class))).thenReturn(new Fund().setId(id));
+        Mockito.when(networkConfigService.getTimestamp()).thenReturn(ts);
         Mockito.when(networkConfigService.get()).thenReturn(new NetworkConfig().setMinFundActivationTime(300L));
         try {
             fundService.create(new Fund()
@@ -157,8 +159,7 @@ public class FundServiceTest {
                     .setRedemptionFrequency(1L)
                     .setSubscriptionAsset(new Asset())
                     .setType(FundType.OPEN_ENDED)
-                    .setActivationDate(LocalDateTime.now().atZone(ZoneId.systemDefault())
-                            .toInstant().toEpochMilli()));
+                    .setActivationDate(ts));
             Assert.fail();
         } catch(ProtocolException e) {
             Assertions.assertEquals(e.getMessage(), ErrorCode.E0013);

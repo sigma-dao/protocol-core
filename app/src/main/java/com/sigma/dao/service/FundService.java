@@ -8,8 +8,6 @@ import com.sigma.dao.model.repository.FundRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 
 @Slf4j
@@ -43,7 +41,7 @@ public class FundService {
      */
     public Fund create(final Fund fund) {
         validate(fund);
-        long timestamp = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        long timestamp = networkConfigService.getTimestamp();
         long diff = fund.getActivationDate() - timestamp;
         if(diff < networkConfigService.get().getMinFundActivationTime()) {
             throw new ProtocolException(ErrorCode.E0013);
@@ -99,9 +97,9 @@ public class FundService {
         if(fund.getRedemptionFrequency() == null) {
             throw new ProtocolException(ErrorCode.E0005);
         }
-//        if(fund.getSubscriptionAsset() == null) {
-//            throw new ProtocolException(ErrorCode.E0006);
-//        }
+        if(fund.getSubscriptionAsset() == null) {
+            throw new ProtocolException(ErrorCode.E0006);
+        }
         if(fund.getType() == null) {
             throw new ProtocolException(ErrorCode.E0007);
         }

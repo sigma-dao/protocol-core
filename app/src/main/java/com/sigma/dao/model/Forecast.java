@@ -6,8 +6,6 @@ import lombok.experimental.Accessors;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.UUID;
 
 @Data
@@ -27,7 +25,7 @@ public class Forecast {
     @JoinColumn(name = "analyst_id", nullable = false)
     private Analyst analyst;
     @Column(name = "forecast_time", nullable = false)
-    private Long forecastTime = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    private Long forecastTime;
     @Column(name = "current_price", nullable = false)
     private Long currentPrice;
     @Column(name = "target_price", nullable = false)

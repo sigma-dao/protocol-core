@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sigma.dao.error.exception.ProtocolException;
 import com.sigma.dao.model.NetworkConfig;
 import com.sigma.dao.model.repository.NetworkConfigRepository;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,10 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class NetworkConfigService {
+
+    @Setter
+    @Getter
+    private Long timestamp;
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 

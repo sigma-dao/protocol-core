@@ -10,17 +10,12 @@ import com.sigma.dao.response.ErrorResponse;
 import com.sigma.dao.service.FundService;
 import com.sigma.dao.service.NetworkConfigService;
 import io.grpc.stub.StreamObserver;
-import jetbrains.exodus.ArrayByteIterable;
-import jetbrains.exodus.ByteIterable;
-import jetbrains.exodus.env.*;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import tendermint.abci.Types;
 
 import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
 
 @Slf4j
 @Component
@@ -30,10 +25,6 @@ public class TendermintBlockchain extends tendermint.abci.ABCIApplicationGrpc.AB
 
     private final NetworkConfigService networkConfigService;
     private final FundService fundService;
-
-    private final Environment env = Environments.newInstance("tmp/storage");
-    private Transaction txn = null;
-    private Store store = null;
 
     public TendermintBlockchain(NetworkConfigService networkConfigService, FundService fundService) {
         this.networkConfigService = networkConfigService;
@@ -79,9 +70,8 @@ public class TendermintBlockchain extends tendermint.abci.ABCIApplicationGrpc.AB
 
     @Override
     public void beginBlock(Types.RequestBeginBlock req, StreamObserver<Types.ResponseBeginBlock> responseObserver) {
-        txn = env.beginTransaction();
-        store = env.openStore("store", StoreConfig.WITHOUT_DUPLICATES, txn);
         var resp = Types.ResponseBeginBlock.newBuilder().build();
+        networkConfigService.setTimestamp(req.getHeader().getTime().getSeconds());
         responseObserver.onNext(resp);
         responseObserver.onCompleted();
     }
@@ -127,7 +117,6 @@ public class TendermintBlockchain extends tendermint.abci.ABCIApplicationGrpc.AB
 
     @Override
     public void commit(Types.RequestCommit req, StreamObserver<Types.ResponseCommit> responseObserver) {
-        txn.commit();
         var resp = Types.ResponseCommit.newBuilder()
                 .setData(ByteString.copyFrom(new byte[8]))
                 .build();
@@ -145,45 +134,12 @@ public class TendermintBlockchain extends tendermint.abci.ABCIApplicationGrpc.AB
 
     @Override
     public void query(Types.RequestQuery req, StreamObserver<Types.ResponseQuery> responseObserver) {
-        var k = req.getData().toByteArray();
-        var v = getPersistedValue(k);
+        var data = req.getData().toStringUtf8();
         var builder = Types.ResponseQuery.newBuilder();
-        if (v == null) {
-            builder.setLog("does not exist");
-        } else {
-            builder.setLog("exists");
-            builder.setKey(ByteString.copyFrom(k));
-            builder.setValue(ByteString.copyFrom(v));
-        }
+        builder.setLog("TODO");
+//        builder.setKey(ByteString.copyFrom(k));
+//        builder.setValue(ByteString.copyFrom(v));
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
-    }
-
-    private List<byte[]> split(ByteString tx, char separator) {
-        var arr = tx.toByteArray();
-        int i;
-        for (i = 0; i < tx.size(); i++) {
-            if (arr[i] == (byte)separator) {
-                break;
-            }
-        }
-        if (i == tx.size()) {
-            return Collections.emptyList();
-        }
-        return List.of(
-                tx.substring(0, i).toByteArray(),
-                tx.substring(i + 1).toByteArray()
-        );
-    }
-
-    private byte[] getPersistedValue(byte[] k) {
-        return env.computeInReadonlyTransaction(txn -> {
-            var store = env.openStore("store", StoreConfig.WITHOUT_DUPLICATES, txn);
-            ByteIterable byteIterable = store.get(txn, new ArrayByteIterable(k));
-            if (byteIterable == null) {
-                return null;
-            }
-            return byteIterable.getBytesUnsafe();
-        });
     }
 }
