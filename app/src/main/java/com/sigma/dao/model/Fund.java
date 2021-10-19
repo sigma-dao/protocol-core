@@ -1,9 +1,8 @@
 package com.sigma.dao.model;
 
-import com.sigma.dao.model.constant.FundStatus;
-import com.sigma.dao.model.constant.FundType;
+import com.sigma.dao.constant.FundStatus;
+import com.sigma.dao.constant.FundType;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import org.hibernate.annotations.GenericGenerator;
 

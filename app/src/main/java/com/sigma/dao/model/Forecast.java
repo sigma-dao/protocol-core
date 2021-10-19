@@ -1,8 +1,7 @@
 package com.sigma.dao.model;
 
-import com.sigma.dao.model.constant.ForecastStatus;
+import com.sigma.dao.constant.ForecastStatus;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import org.hibernate.annotations.GenericGenerator;
 

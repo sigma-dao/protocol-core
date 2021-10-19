@@ -1,4 +1,4 @@
-package com.sigma.dao.model.repository;
+package com.sigma.dao.repository;
 
 import com.sigma.dao.model.Analyst;
 import org.springframework.data.jpa.repository.JpaRepository;

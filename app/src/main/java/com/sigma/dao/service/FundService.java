@@ -3,8 +3,8 @@ package com.sigma.dao.service;
 import com.sigma.dao.error.ErrorCode;
 import com.sigma.dao.error.exception.ProtocolException;
 import com.sigma.dao.model.Fund;
-import com.sigma.dao.model.constant.FundStatus;
-import com.sigma.dao.model.repository.FundRepository;
+import com.sigma.dao.constant.FundStatus;
+import com.sigma.dao.repository.FundRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

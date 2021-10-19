@@ -3,7 +3,7 @@ package com.sigma.dao.blockchain;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.ByteString;
-import com.sigma.dao.blockchain.constant.TendermintTransaction;
+import com.sigma.dao.constant.TendermintTransaction;
 import com.sigma.dao.error.ErrorCode;
 import com.sigma.dao.error.exception.ProtocolException;
 import com.sigma.dao.model.Fund;

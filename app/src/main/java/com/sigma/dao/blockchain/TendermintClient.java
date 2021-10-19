@@ -1,7 +1,7 @@
 package com.sigma.dao.blockchain;
 
-import com.sigma.dao.blockchain.constant.TendermintQuery;
-import com.sigma.dao.blockchain.constant.TendermintTransaction;
+import com.sigma.dao.constant.TendermintQuery;
+import com.sigma.dao.constant.TendermintTransaction;
 import kong.unirest.HttpResponse;
 import kong.unirest.JsonNode;
 import kong.unirest.Unirest;

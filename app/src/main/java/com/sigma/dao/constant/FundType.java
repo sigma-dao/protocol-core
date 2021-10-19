@@ -1,4 +1,4 @@
-package com.sigma.dao.model.constant;
+package com.sigma.dao.constant;
 
 public enum FundType {
     OPEN_ENDED, CLOSED_ENDED;

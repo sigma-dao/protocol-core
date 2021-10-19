@@ -2,8 +2,8 @@ package com.sigma.dao.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sigma.dao.blockchain.TendermintClient;
-import com.sigma.dao.blockchain.constant.TendermintQuery;
-import com.sigma.dao.blockchain.constant.TendermintTransaction;
+import com.sigma.dao.constant.TendermintQuery;
+import com.sigma.dao.constant.TendermintTransaction;
 import com.sigma.dao.model.Fund;
 import lombok.SneakyThrows;
 import org.springframework.http.ResponseEntity;
