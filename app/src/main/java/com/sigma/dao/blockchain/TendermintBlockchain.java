@@ -3,14 +3,14 @@ package com.sigma.dao.blockchain;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.ByteString;
+import com.sigma.dao.blockchain.constant.TendermintQuery;
 import com.sigma.dao.blockchain.constant.TendermintTransaction;
 import com.sigma.dao.error.exception.ProtocolException;
-import com.sigma.dao.model.Fund;
-import com.sigma.dao.response.ErrorResponse;
 import com.sigma.dao.service.FundService;
 import com.sigma.dao.service.NetworkConfigService;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import tendermint.abci.Types;
@@ -21,14 +21,22 @@ import java.util.Base64;
 @Component
 public class TendermintBlockchain extends tendermint.abci.ABCIApplicationGrpc.ABCIApplicationImplBase {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-
+    private final ObjectMapper objectMapper;
     private final NetworkConfigService networkConfigService;
     private final FundService fundService;
+    private final TendermintTransactionHandler tendermintTransactionHandler;
+    private final TendermintQueryHandler tendermintQueryHandler;
 
-    public TendermintBlockchain(NetworkConfigService networkConfigService, FundService fundService) {
+    public TendermintBlockchain(ObjectMapper objectMapper,
+                                NetworkConfigService networkConfigService,
+                                FundService fundService,
+                                TendermintTransactionHandler tendermintTransactionHandler,
+                                TendermintQueryHandler tendermintQueryHandler) {
+        this.objectMapper = objectMapper;
         this.networkConfigService = networkConfigService;
         this.fundService = fundService;
+        this.tendermintTransactionHandler = tendermintTransactionHandler;
+        this.tendermintQueryHandler = tendermintQueryHandler;
     }
 
     @Override
@@ -79,37 +87,16 @@ public class TendermintBlockchain extends tendermint.abci.ABCIApplicationGrpc.AB
     @Override
     public void deliverTx(Types.RequestDeliverTx req, StreamObserver<Types.ResponseDeliverTx> responseObserver) {
         var tx = req.getTx();
-        String result;
         Types.ResponseDeliverTx.Builder builder = Types.ResponseDeliverTx.newBuilder();
         Types.ResponseDeliverTx resp;
         try {
             JSONObject jsonObject = new JSONObject(new String(Base64.getDecoder().decode(tx.toStringUtf8())));
             TendermintTransaction transaction = TendermintTransaction.valueOf(jsonObject.getString("tx"));
-            if (transaction.equals(TendermintTransaction.CREATE_FUND)) {
-                try {
-                    Fund fund = objectMapper.readValue(jsonObject.getJSONObject("payload").toString(), Fund.class);
-                    fund = fundService.create(fund);
-                    result = objectMapper.writeValueAsString(fund);
-                    resp = builder.setCode(0).setLog(result).build();
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
-                    String errorJson = objectMapper.writeValueAsString(new ErrorResponse().setCode(e.getMessage()));
-                    resp = builder.setCode(1).setLog(errorJson).build();
-                }
-            } else {
-                String errorJson = objectMapper.writeValueAsString(new ErrorResponse()
-                        .setCode(String.format("Unsupported tx: %s", transaction)));
-                resp = builder.setCode(1).setLog(errorJson).build();
-            }
+            ByteString data = tendermintTransactionHandler.process(transaction, jsonObject);
+            resp = builder.setCode(0).setData(data).build();
         } catch(Exception e) {
-            String errorJson = "{}";
-            try {
-                errorJson = objectMapper.writeValueAsString(new ErrorResponse()
-                        .setCode(String.format("Unknown error: %s", e.getMessage())));
-            } catch(Exception e2) {
-                log.error(e2.getMessage(), e2);
-            }
-            resp = builder.setCode(1).setLog(errorJson).build();
+            resp = builder.setCode(1).setData(ByteString.copyFromUtf8(
+                    new JSONObject().put("error", e.getMessage()).toString())).build();
         }
         responseObserver.onNext(resp);
         responseObserver.onCompleted();
@@ -134,12 +121,22 @@ public class TendermintBlockchain extends tendermint.abci.ABCIApplicationGrpc.AB
 
     @Override
     public void query(Types.RequestQuery req, StreamObserver<Types.ResponseQuery> responseObserver) {
-        var data = req.getData().toStringUtf8();
-        var builder = Types.ResponseQuery.newBuilder();
-        builder.setLog("TODO");
-//        builder.setKey(ByteString.copyFrom(k));
-//        builder.setValue(ByteString.copyFrom(v));
-        responseObserver.onNext(builder.build());
+        var data = req.getData();
+        Types.ResponseQuery.Builder builder = Types.ResponseQuery.newBuilder();
+        Types.ResponseQuery resp;
+        try {
+            JSONObject jsonObject = new JSONObject(new String(Base64.getDecoder().decode(data.toStringUtf8())));
+            TendermintQuery query = TendermintQuery.valueOf(jsonObject.getString("query"));
+            String result = tendermintQueryHandler.process(query, jsonObject);
+            try {
+                resp = builder.setCode(0).setLog(new JSONObject(result).toString()).build();
+            } catch(Exception e) {
+                resp = builder.setCode(0).setLog(new JSONArray(result).toString()).build();
+            }
+        } catch(Exception e) {
+            resp = builder.setCode(1).setLog(new JSONObject().put("error", e.getMessage()).toString()).build();
+        }
+        responseObserver.onNext(resp);
         responseObserver.onCompleted();
     }
 }

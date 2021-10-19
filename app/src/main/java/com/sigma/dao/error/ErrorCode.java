@@ -15,4 +15,6 @@ public final class ErrorCode {
     public static final String E0012 = "Activation date is a mandatory field.";
     public static final String E0013 = "Activation date is too soon.";
     public static final String E0014 = "Fund status cannot be changed.";
+    public static final String E0015 = "Unsupported Tendermint transaction.";
+    public static final String E0016 = "Unsupported Tendermint query.";
 }

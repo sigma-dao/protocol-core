@@ -2,17 +2,19 @@ package com.sigma.dao.model;
 
 import com.sigma.dao.model.constant.Blockchain;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.UUID;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @Table(name = "sigma_asset")
 @Accessors(chain = true)
-public class Asset {
+public class Asset extends NetworkEntity {
     @Id
     @Column(name = "id", updatable = false, nullable = false)
     @GeneratedValue(generator = "UUID")

@@ -2,17 +2,19 @@ package com.sigma.dao.model;
 
 import com.sigma.dao.model.constant.ForecastStatus;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.UUID;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @Table(name = "sigma_forecast")
 @Accessors(chain = true)
-public class Forecast {
+public class Forecast extends NetworkEntity {
     @Id
     @Column(name = "id", updatable = false, nullable = false)
     @GeneratedValue(generator = "UUID")

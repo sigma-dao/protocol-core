@@ -3,24 +3,26 @@ package com.sigma.dao.model;
 import com.sigma.dao.model.constant.FundStatus;
 import com.sigma.dao.model.constant.FundType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.UUID;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @Table(name = "sigma_fund")
 @Accessors(chain = true)
-public class Fund {
+public class Fund extends NetworkEntity {
     @Id
     @Column(name = "id", updatable = false, nullable = false)
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private UUID id;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subscription_asset_id", nullable = false)
+    @JoinColumn(name = "subscription_asset_id", nullable = true)
     private Asset subscriptionAsset;
     @Column(name = "minimum_subscription", nullable = false)
     private Long minimumSubscription;
