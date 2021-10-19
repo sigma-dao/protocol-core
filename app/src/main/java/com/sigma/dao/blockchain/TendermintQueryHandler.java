@@ -6,7 +6,9 @@ import com.sigma.dao.constant.TendermintQuery;
 import com.sigma.dao.error.ErrorCode;
 import com.sigma.dao.error.exception.ProtocolException;
 import com.sigma.dao.model.Fund;
+import com.sigma.dao.model.NetworkConfig;
 import com.sigma.dao.service.FundService;
+import com.sigma.dao.service.NetworkConfigService;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
@@ -17,10 +19,14 @@ public class TendermintQueryHandler {
 
     private final ObjectMapper objectMapper;
     private final FundService fundService;
+    private final NetworkConfigService networkConfigService;
 
-    public TendermintQueryHandler(ObjectMapper objectMapper, FundService fundService) {
+    public TendermintQueryHandler(ObjectMapper objectMapper,
+                                  FundService fundService,
+                                  NetworkConfigService networkConfigService) {
         this.objectMapper = objectMapper;
         this.fundService = fundService;
+        this.networkConfigService = networkConfigService;
     }
 
     /**
@@ -38,6 +44,9 @@ public class TendermintQueryHandler {
         if(query.equals(TendermintQuery.GET_FUNDS)) {
             List<Fund> funds = fundService.get();
             return objectMapper.writeValueAsString(funds);
+        } else if(query.equals(TendermintQuery.GET_NETWORK_CONFIG)) {
+            NetworkConfig networkConfig = networkConfigService.get();
+            return objectMapper.writeValueAsString(networkConfig);
         }
         throw new ProtocolException(ErrorCode.E0016);
     }
