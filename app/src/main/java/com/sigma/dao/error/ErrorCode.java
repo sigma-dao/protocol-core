@@ -17,4 +17,9 @@ public final class ErrorCode {
     public static final String E0014 = "Fund status cannot be changed.";
     public static final String E0015 = "Unsupported Tendermint transaction.";
     public static final String E0016 = "Unsupported Tendermint query.";
+    public static final String E0017 = "Blockchain is a mandatory field.";
+    public static final String E0018 = "Contract address is a mandatory field.";
+    public static final String E0019 = "Symbol is a mandatory field.";
+    public static final String E0020 = "Asset cannot be deleted when it is being used by a fund.";
+    public static final String E0021 = "Asset cannot be found with specified ID.";
 }

@@ -3,10 +3,11 @@ package com.sigma.dao.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.*;
-import java.util.UUID;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Data
 @Entity
@@ -16,9 +17,9 @@ public class NetworkConfig {
     @Id
     @JsonIgnore
     @Column(name = "id", updatable = false, nullable = false)
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    private UUID id;
+    private Long id = 1L;
     @Column(name = "min_fund_activation_time", nullable = false)
     private Long minFundActivationTime;
+    @Column(name = "uuid_seed", nullable = false)
+    private Long uuidSeed;
 }

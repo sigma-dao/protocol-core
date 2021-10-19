@@ -4,7 +4,6 @@ import com.sigma.dao.constant.FundStatus;
 import com.sigma.dao.constant.FundType;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.UUID;
@@ -16,8 +15,6 @@ import java.util.UUID;
 public class Fund {
     @Id
     @Column(name = "id", updatable = false, nullable = false)
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private UUID id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subscription_asset_id", nullable = false)

@@ -1,13 +1,14 @@
 package com.sigma.dao.service;
 
+import com.sigma.dao.constant.FundStatus;
+import com.sigma.dao.constant.FundType;
 import com.sigma.dao.error.ErrorCode;
 import com.sigma.dao.error.exception.ProtocolException;
 import com.sigma.dao.model.Asset;
 import com.sigma.dao.model.Fund;
 import com.sigma.dao.model.NetworkConfig;
-import com.sigma.dao.constant.FundStatus;
-import com.sigma.dao.constant.FundType;
 import com.sigma.dao.repository.FundRepository;
+import com.sigma.dao.utils.UUIDUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,12 +28,14 @@ public class FundServiceTest {
     private FundService fundService;
     private FundRepository fundRepository;
     private NetworkConfigService networkConfigService;
+    private UUIDUtils uuidUtils;
 
     @Before
     public void setup() {
+        uuidUtils = Mockito.mock(UUIDUtils.class);
         fundRepository = Mockito.mock(FundRepository.class);
         networkConfigService = Mockito.mock(NetworkConfigService.class);
-        fundService = new FundService(fundRepository, networkConfigService);
+        fundService = new FundService(fundRepository, networkConfigService, uuidUtils);
     }
 
     @Test

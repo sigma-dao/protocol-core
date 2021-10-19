@@ -5,6 +5,7 @@ import com.sigma.dao.error.exception.ProtocolException;
 import com.sigma.dao.model.Fund;
 import com.sigma.dao.constant.FundStatus;
 import com.sigma.dao.repository.FundRepository;
+import com.sigma.dao.utils.UUIDUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -16,11 +17,14 @@ public class FundService {
 
     private final FundRepository fundRepository;
     private final NetworkConfigService networkConfigService;
+    private final UUIDUtils uuidUtils;
 
     public FundService(FundRepository fundRepository,
-                       NetworkConfigService networkConfigService) {
+                       NetworkConfigService networkConfigService,
+                       UUIDUtils uuidUtils) {
         this.fundRepository = fundRepository;
         this.networkConfigService = networkConfigService;
+        this.uuidUtils = uuidUtils;
     }
 
     /**
@@ -47,6 +51,7 @@ public class FundService {
             throw new ProtocolException(ErrorCode.E0013);
         }
         fund.setStatus(FundStatus.PROPOSED);
+        fund.setId(uuidUtils.next());
         return fundRepository.save(fund);
     }
 

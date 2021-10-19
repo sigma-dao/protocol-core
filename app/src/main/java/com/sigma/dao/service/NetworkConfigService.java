@@ -36,6 +36,13 @@ public class NetworkConfigService {
         this.networkConfigRepository.save(networkConfig);
     }
 
+    /**
+     * Increment the seed used to generate deterministic UUIDs
+     */
+    public void incrementUuidSeed() {
+        networkConfigRepository.save(get().setUuidSeed(get().getUuidSeed() + 1));
+    }
+
     public void proposeNetworkConfigChange() {
 
     }
