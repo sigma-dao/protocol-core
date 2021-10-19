@@ -20,4 +20,8 @@ public class GovernanceAction {
     private GovernanceActionType type;
     @Column(name = "entity_id", nullable = false)
     private UUID entityId;
+    @Column(name = "votes_against", nullable = false)
+    private Integer votesFor;
+    @Column(name = "votes_for", nullable = false)
+    private Integer votesAgainst;
 }

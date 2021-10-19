@@ -52,12 +52,18 @@ public class AssetService {
         if(asset.getSymbol() == null) {
             throw new ProtocolException(ErrorCode.E0019);
         }
-        // TODO - cannot save duplicate assets
+        Optional<Asset> assetOptional = assetRepository.findByBlockchainAndContractAddress(
+                asset.getBlockchain(), asset.getContractAddress()).stream().findAny();
+        if(assetOptional.isPresent()) {
+            throw new ProtocolException(ErrorCode.E0022);
+        }
         asset.setStatus(GovernanceStatus.SUBMITTED);
         asset.setId(uuidUtils.next());
         asset = assetRepository.save(asset);
         governanceActionRepository.save(new GovernanceAction()
                 .setEntityId(asset.getId())
+                .setVotesFor(0)
+                .setVotesAgainst(0)
                 .setType(GovernanceActionType.ADD_ASSET));
         return asset;
     }
@@ -84,6 +90,8 @@ public class AssetService {
         }
         governanceActionRepository.save(new GovernanceAction()
                 .setEntityId(asset.getId())
+                .setVotesFor(0)
+                .setVotesAgainst(0)
                 .setType(GovernanceActionType.REMOVE_ASSET)
                 .setId(uuidUtils.next()));
         return asset;

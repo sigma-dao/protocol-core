@@ -1,9 +1,11 @@
 package com.sigma.dao.service;
 
+import com.sigma.dao.constant.FundStatus;
 import com.sigma.dao.error.ErrorCode;
 import com.sigma.dao.error.exception.ProtocolException;
+import com.sigma.dao.model.Asset;
 import com.sigma.dao.model.Fund;
-import com.sigma.dao.constant.FundStatus;
+import com.sigma.dao.repository.AssetRepository;
 import com.sigma.dao.repository.FundRepository;
 import com.sigma.dao.utils.UUIDUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -17,13 +19,16 @@ public class FundService {
 
     private final FundRepository fundRepository;
     private final NetworkConfigService networkConfigService;
+    private final AssetRepository assetRepository;
     private final UUIDUtils uuidUtils;
 
     public FundService(FundRepository fundRepository,
                        NetworkConfigService networkConfigService,
+                       AssetRepository assetRepository,
                        UUIDUtils uuidUtils) {
         this.fundRepository = fundRepository;
         this.networkConfigService = networkConfigService;
+        this.assetRepository = assetRepository;
         this.uuidUtils = uuidUtils;
     }
 
@@ -50,7 +55,10 @@ public class FundService {
         if(diff < networkConfigService.get().getMinFundActivationTime()) {
             throw new ProtocolException(ErrorCode.E0013);
         }
+        Asset subscriptionAsset = assetRepository.findById(fund.getSubscriptionAsset().getId())
+                .orElseThrow(() -> new ProtocolException(ErrorCode.E0021));
         fund.setStatus(FundStatus.PROPOSED);
+        fund.setSubscriptionAsset(subscriptionAsset);
         fund.setId(uuidUtils.next());
         return fundRepository.save(fund);
     }
@@ -77,6 +85,7 @@ public class FundService {
         if(!fund.getStatus().equals(currentFund.getStatus())) {
             throw new ProtocolException(ErrorCode.E0014);
         }
+        fund.setSubscriptionAsset(currentFund.getSubscriptionAsset());
         validate(fund);
         return fundRepository.save(fund);
     }

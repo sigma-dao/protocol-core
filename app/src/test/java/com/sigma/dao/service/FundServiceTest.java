@@ -7,6 +7,7 @@ import com.sigma.dao.error.exception.ProtocolException;
 import com.sigma.dao.model.Asset;
 import com.sigma.dao.model.Fund;
 import com.sigma.dao.model.NetworkConfig;
+import com.sigma.dao.repository.AssetRepository;
 import com.sigma.dao.repository.FundRepository;
 import com.sigma.dao.utils.UUIDUtils;
 import org.junit.Assert;
@@ -28,6 +29,7 @@ public class FundServiceTest {
     private FundService fundService;
     private FundRepository fundRepository;
     private NetworkConfigService networkConfigService;
+    private AssetRepository assetRepository;
     private UUIDUtils uuidUtils;
 
     @Before
@@ -35,7 +37,8 @@ public class FundServiceTest {
         uuidUtils = Mockito.mock(UUIDUtils.class);
         fundRepository = Mockito.mock(FundRepository.class);
         networkConfigService = Mockito.mock(NetworkConfigService.class);
-        fundService = new FundService(fundRepository, networkConfigService, uuidUtils);
+        assetRepository = Mockito.mock(AssetRepository.class);
+        fundService = new FundService(fundRepository, networkConfigService, assetRepository, uuidUtils);
     }
 
     @Test
@@ -170,8 +173,35 @@ public class FundServiceTest {
     }
 
     @Test
+    public void testCreateFundInvalidSubscriptionAsset() {
+        UUID id = UUID.randomUUID();
+        long ts = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
+        Mockito.when(fundRepository.save(Mockito.any(Fund.class))).thenReturn(new Fund().setId(id));
+        Mockito.when(networkConfigService.getTimestamp()).thenReturn(ts);
+        Mockito.when(networkConfigService.get()).thenReturn(new NetworkConfig().setMinFundActivationTime(300L));
+        try {
+            fundService.create(new Fund()
+                    .setDisbursementFrequency(1L)
+                    .setManagementFee(1)
+                    .setMinimumSubscription(1L)
+                    .setPerformanceFee(1)
+                    .setRedemptionFrequency(1L)
+                    .setSubscriptionAsset(new Asset().setId(UUID.randomUUID()))
+                    .setType(FundType.OPEN_ENDED)
+                    .setActivationDate(LocalDateTime.now().plusDays(1).atZone(ZoneId.systemDefault())
+                            .toInstant().toEpochMilli()));
+            Assert.fail();
+        } catch(ProtocolException e) {
+            Assertions.assertEquals(e.getMessage(), ErrorCode.E0021);
+        }
+    }
+
+    @Test
     public void testCreateFund() {
         UUID id = UUID.randomUUID();
+        UUID assetId = UUID.randomUUID();
+        Mockito.when(assetRepository.findById(Mockito.any(UUID.class)))
+                .thenReturn(Optional.of(new Asset().setId(assetId)));
         Mockito.when(fundRepository.save(Mockito.any(Fund.class))).thenReturn(new Fund().setId(id));
         Mockito.when(networkConfigService.get()).thenReturn(new NetworkConfig().setMinFundActivationTime(300L));
         Fund fund = fundService.create(new Fund()
@@ -180,7 +210,7 @@ public class FundServiceTest {
                 .setMinimumSubscription(1L)
                 .setPerformanceFee(1)
                 .setRedemptionFrequency(1L)
-                .setSubscriptionAsset(new Asset())
+                .setSubscriptionAsset(new Asset().setId(assetId))
                 .setType(FundType.OPEN_ENDED)
                 .setActivationDate(LocalDateTime.now().plusDays(1).atZone(ZoneId.systemDefault())
                         .toInstant().toEpochMilli()));
@@ -306,9 +336,13 @@ public class FundServiceTest {
     public void testUpdateFund() {
         long activationDate = LocalDateTime.now().plusDays(1).atZone(ZoneId.systemDefault())
                 .toInstant().toEpochMilli();
+        UUID assetId = UUID.randomUUID();
+        Mockito.when(assetRepository.findById(Mockito.any(UUID.class)))
+                .thenReturn(Optional.of(new Asset().setId(assetId)));
         Mockito.when(networkConfigService.get()).thenReturn(new NetworkConfig().setMinFundActivationTime(300L));
         Mockito.when(fundRepository.findById(Mockito.any(UUID.class)))
-                .thenReturn(Optional.of(new Fund().setActivationDate(activationDate).setStatus(FundStatus.PROPOSED)));
+                .thenReturn(Optional.of(new Fund().setSubscriptionAsset(new Asset().setId(assetId))
+                        .setActivationDate(activationDate).setStatus(FundStatus.PROPOSED)));
         Mockito.when(fundRepository.save(Mockito.any(Fund.class))).thenReturn(new Fund());
         Fund fund = fundService.update(new Fund()
                 .setDisbursementFrequency(1L)
@@ -317,7 +351,7 @@ public class FundServiceTest {
                 .setPerformanceFee(1)
                 .setRedemptionFrequency(1L)
                 .setStatus(FundStatus.PROPOSED)
-                .setSubscriptionAsset(new Asset())
+                .setSubscriptionAsset(new Asset().setId(assetId))
                 .setType(FundType.OPEN_ENDED)
                 .setId(UUID.randomUUID())
                 .setActivationDate(activationDate));

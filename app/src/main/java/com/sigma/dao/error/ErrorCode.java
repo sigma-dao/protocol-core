@@ -22,4 +22,5 @@ public final class ErrorCode {
     public static final String E0019 = "Symbol is a mandatory field.";
     public static final String E0020 = "Asset cannot be deleted when it is being used by a fund.";
     public static final String E0021 = "Asset cannot be found with specified ID.";
+    public static final String E0022 = "The asset you're trying to add already exists.";
 }
