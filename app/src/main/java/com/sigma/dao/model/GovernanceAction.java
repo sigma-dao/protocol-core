@@ -24,4 +24,8 @@ public class GovernanceAction {
     private Integer votesFor;
     @Column(name = "votes_for", nullable = false)
     private Integer votesAgainst;
+    @Column(name = "opening_timestamp", nullable = false)
+    private Long openingTimestamp;
+    @Column(name = "enactment_timestamp", nullable = false)
+    private Long enactmentTimestamp;
 }

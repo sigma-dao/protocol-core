@@ -2,6 +2,7 @@ package com.sigma.dao.service;
 
 import com.sigma.dao.constant.FundStatus;
 import com.sigma.dao.constant.FundType;
+import com.sigma.dao.constant.GovernanceStatus;
 import com.sigma.dao.error.ErrorCode;
 import com.sigma.dao.error.exception.ProtocolException;
 import com.sigma.dao.model.Asset;
@@ -195,11 +196,36 @@ public class FundServiceTest {
     }
 
     @Test
+    public void testCreateFundIncorrectAssetStatus() {
+        UUID id = UUID.randomUUID();
+        UUID assetId = UUID.randomUUID();
+        Mockito.when(assetRepository.findById(Mockito.any(UUID.class)))
+                .thenReturn(Optional.of(new Asset().setId(assetId).setStatus(GovernanceStatus.SUBMITTED)));
+        Mockito.when(fundRepository.save(Mockito.any(Fund.class))).thenReturn(new Fund().setId(id));
+        Mockito.when(networkConfigService.get()).thenReturn(new NetworkConfig().setMinFundActivationTime(300L));
+        try {
+            fundService.create(new Fund()
+                    .setDisbursementFrequency(1L)
+                    .setManagementFee(1)
+                    .setMinimumSubscription(1L)
+                    .setPerformanceFee(1)
+                    .setRedemptionFrequency(1L)
+                    .setSubscriptionAsset(new Asset().setId(assetId))
+                    .setType(FundType.OPEN_ENDED)
+                    .setActivationDate(LocalDateTime.now().plusDays(1).atZone(ZoneId.systemDefault())
+                            .toInstant().toEpochMilli()));
+            Assert.fail();
+        } catch(ProtocolException e) {
+            Assertions.assertEquals(e.getMessage(), ErrorCode.E0024);
+        }
+    }
+
+    @Test
     public void testCreateFund() {
         UUID id = UUID.randomUUID();
         UUID assetId = UUID.randomUUID();
         Mockito.when(assetRepository.findById(Mockito.any(UUID.class)))
-                .thenReturn(Optional.of(new Asset().setId(assetId)));
+                .thenReturn(Optional.of(new Asset().setId(assetId).setStatus(GovernanceStatus.APPROVED)));
         Mockito.when(fundRepository.save(Mockito.any(Fund.class))).thenReturn(new Fund().setId(id));
         Mockito.when(networkConfigService.get()).thenReturn(new NetworkConfig().setMinFundActivationTime(300L));
         Fund fund = fundService.create(new Fund()

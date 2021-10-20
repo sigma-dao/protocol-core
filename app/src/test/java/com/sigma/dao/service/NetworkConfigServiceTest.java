@@ -54,4 +54,10 @@ public class NetworkConfigServiceTest {
             Assertions.assertEquals(ErrorCode.E0023, e.getMessage());
         }
     }
+
+    @Test
+    public void testSetTimestamp() {
+        networkConfigService.setTimestamp(1L);
+        Assertions.assertEquals(networkConfigService.getTimestamp(), 1L);
+    }
 }

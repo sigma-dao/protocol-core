@@ -27,4 +27,5 @@ public final class ErrorCode {
     public static final String E0024 = "The subscription asset must be approved by governance.";
     public static final String E0025 = "Governance action cannot be found with specified ID.";
     public static final String E0026 = "User not found with public key.";
+    public static final String E0027 = "Signature is invalid.";
 }

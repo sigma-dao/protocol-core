@@ -23,17 +23,20 @@ public class GovernanceActionService {
     private final UserRepository userRepository;
     private final GovernanceVoteRepository governanceVoteRepository;
     private final NetworkConfigService networkConfigService;
+    private final AuthenticationService authenticationService;
     private final UUIDUtils uuidUtils;
 
     public GovernanceActionService(GovernanceActionRepository governanceActionRepository,
                                    UserRepository userRepository,
                                    GovernanceVoteRepository governanceVoteRepository,
                                    NetworkConfigService networkConfigService,
+                                   AuthenticationService authenticationService,
                                    UUIDUtils uuidUtils) {
         this.governanceActionRepository = governanceActionRepository;
         this.userRepository = userRepository;
         this.governanceVoteRepository = governanceVoteRepository;
         this.networkConfigService = networkConfigService;
+        this.authenticationService = authenticationService;
         this.uuidUtils = uuidUtils;
     }
 
@@ -63,6 +66,9 @@ public class GovernanceActionService {
                 .orElseThrow(() -> new ProtocolException(ErrorCode.E0025));
         User user = userRepository.findByPublicKey(request.getPublicKey())
                 .orElseThrow(() -> new ProtocolException(ErrorCode.E0026));
+        if(!authenticationService.validSignature(request)) {
+            throw new ProtocolException(ErrorCode.E0027);
+        }
         if(request.getVoteFor()) {
             governanceAction.setVotesFor(governanceAction.getVotesFor() + user.getStake());
         } else {
