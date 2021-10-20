@@ -6,6 +6,7 @@ import com.google.protobuf.ByteString;
 import com.sigma.dao.constant.TendermintTransaction;
 import com.sigma.dao.error.ErrorCode;
 import com.sigma.dao.error.exception.ProtocolException;
+import com.sigma.dao.model.Asset;
 import com.sigma.dao.model.Fund;
 import com.sigma.dao.request.AddAssetRequest;
 import com.sigma.dao.service.*;
@@ -59,7 +60,8 @@ public class TendermintTransactionHandler {
             Fund fund = fundService.update(objectMapper.readValue(payload, Fund.class));
             return ByteString.copyFromUtf8(objectMapper.writeValueAsString(fund));
         } else if(transaction.equals(TendermintTransaction.ADD_ASSET)) {
-            assetService.add(objectMapper.readValue(payload, AddAssetRequest.class));
+            Asset asset = assetService.add(objectMapper.readValue(payload, AddAssetRequest.class));
+            return ByteString.copyFromUtf8(objectMapper.writeValueAsString(asset));
         }
         throw new ProtocolException(ErrorCode.E0015);
     }
