@@ -10,6 +10,7 @@ import com.sigma.dao.model.GovernanceAction;
 import com.sigma.dao.repository.AssetRepository;
 import com.sigma.dao.repository.FundRepository;
 import com.sigma.dao.repository.GovernanceActionRepository;
+import com.sigma.dao.request.AddAssetRequest;
 import com.sigma.dao.utils.UUIDUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,27 +39,31 @@ public class AssetService {
     /**
      * Add a new asset (must be approved by governance voting)
      *
-     * @param asset the {@link Asset} instance
+     * @param request {@link AddAssetRequest}
      *
      * @return the new {@link Asset}
      */
-    public Asset add(Asset asset) {
-        if(asset.getBlockchain() == null) {
+    public Asset add(AddAssetRequest request) {
+        if(request.getBlockchain() == null) {
             throw new ProtocolException(ErrorCode.E0017);
         }
-        if(asset.getContractAddress() == null) {
+        if(request.getContractAddress() == null) {
             throw new ProtocolException(ErrorCode.E0018);
         }
-        if(asset.getSymbol() == null) {
+        if(request.getSymbol() == null) {
             throw new ProtocolException(ErrorCode.E0019);
         }
         Optional<Asset> assetOptional = assetRepository.findByBlockchainAndContractAddress(
-                asset.getBlockchain(), asset.getContractAddress()).stream().findAny();
+                request.getBlockchain(), request.getContractAddress()).stream().findAny();
         if(assetOptional.isPresent()) {
             throw new ProtocolException(ErrorCode.E0022);
         }
-        asset.setStatus(GovernanceStatus.SUBMITTED);
-        asset.setId(uuidUtils.next());
+        Asset asset = new Asset()
+                .setBlockchain(request.getBlockchain())
+                .setSymbol(request.getSymbol())
+                .setContractAddress(request.getContractAddress())
+                .setStatus(GovernanceStatus.SUBMITTED)
+                .setId(uuidUtils.next());
         asset = assetRepository.save(asset);
         governanceActionRepository.save(new GovernanceAction()
                 .setEntityId(asset.getId())

@@ -9,8 +9,8 @@ import com.sigma.dao.model.GovernanceAction;
 import com.sigma.dao.repository.AssetRepository;
 import com.sigma.dao.repository.FundRepository;
 import com.sigma.dao.repository.GovernanceActionRepository;
+import com.sigma.dao.request.AddAssetRequest;
 import com.sigma.dao.utils.UUIDUtils;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
@@ -40,7 +40,7 @@ public class AssetServiceTest {
     @Test
     public void testAddAssetMissingBlockchain() {
         try {
-            assetService.add(new Asset());
+            assetService.add(new AddAssetRequest());
             Assertions.fail();
         } catch(Exception e) {
             Assertions.assertEquals(ErrorCode.E0017, e.getMessage());
@@ -50,7 +50,7 @@ public class AssetServiceTest {
     @Test
     public void testAddAssetMissingContractAddress() {
         try {
-            assetService.add(new Asset()
+            assetService.add(new AddAssetRequest()
                     .setBlockchain(Blockchain.ETHEREUM));
             Assertions.fail();
         } catch(Exception e) {
@@ -61,7 +61,7 @@ public class AssetServiceTest {
     @Test
     public void testAddAssetMissingSymbol() {
         try {
-            assetService.add(new Asset()
+            assetService.add(new AddAssetRequest()
                     .setBlockchain(Blockchain.ETHEREUM)
                     .setContractAddress("0x0"));
             Assertions.fail();
@@ -75,7 +75,7 @@ public class AssetServiceTest {
         Mockito.when(assetRepository.findByBlockchainAndContractAddress(
                 Mockito.any(Blockchain.class), Mockito.any())).thenReturn(List.of(new Asset()));
         try {
-            assetService.add(new Asset()
+            assetService.add(new AddAssetRequest()
                     .setBlockchain(Blockchain.ETHEREUM)
                     .setContractAddress("0x0")
                     .setSymbol("XYZ"));
@@ -92,7 +92,7 @@ public class AssetServiceTest {
         Mockito.when(assetRepository.save(Mockito.any(Asset.class))).thenReturn(new Asset());
         Mockito.when(governanceActionRepository.save(Mockito.any(GovernanceAction.class)))
                 .thenReturn(new GovernanceAction());
-        Asset asset = assetService.add(new Asset()
+        Asset asset = assetService.add(new AddAssetRequest()
                 .setBlockchain(Blockchain.ETHEREUM)
                 .setContractAddress("0x0")
                 .setSymbol("XYZ"));
