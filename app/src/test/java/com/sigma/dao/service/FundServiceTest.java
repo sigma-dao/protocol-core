@@ -15,7 +15,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -23,7 +22,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@SpringBootTest
 public class FundServiceTest {
 
     private FundService fundService;

@@ -23,4 +23,8 @@ public final class ErrorCode {
     public static final String E0020 = "Asset cannot be deleted when it is being used by a fund.";
     public static final String E0021 = "Asset cannot be found with specified ID.";
     public static final String E0022 = "The asset you're trying to add already exists.";
+    public static final String E0023 = "The network config is missing.";
+    public static final String E0024 = "The subscription asset must be approved by governance.";
+    public static final String E0025 = "Governance action cannot be found with specified ID.";
+    public static final String E0026 = "User not found with public key.";
 }

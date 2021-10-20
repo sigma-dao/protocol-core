@@ -1,6 +1,7 @@
 package com.sigma.dao.service;
 
 import com.sigma.dao.constant.FundStatus;
+import com.sigma.dao.constant.GovernanceStatus;
 import com.sigma.dao.error.ErrorCode;
 import com.sigma.dao.error.exception.ProtocolException;
 import com.sigma.dao.model.Asset;
@@ -57,6 +58,9 @@ public class FundService {
         }
         Asset subscriptionAsset = assetRepository.findById(fund.getSubscriptionAsset().getId())
                 .orElseThrow(() -> new ProtocolException(ErrorCode.E0021));
+        if(!subscriptionAsset.getStatus().equals(GovernanceStatus.APPROVED)) {
+            throw new ProtocolException(ErrorCode.E0024);
+        }
         fund.setStatus(FundStatus.PROPOSED);
         fund.setSubscriptionAsset(subscriptionAsset);
         fund.setId(uuidUtils.next());

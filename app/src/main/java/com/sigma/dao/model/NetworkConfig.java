@@ -22,4 +22,6 @@ public class NetworkConfig {
     private Long minFundActivationTime;
     @Column(name = "uuid_seed", nullable = false)
     private Long uuidSeed;
+    @Column(name = "governance_token_address", nullable = false)
+    private String governanceTokenAddress;
 }

@@ -2,6 +2,7 @@ package com.sigma.dao.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sigma.dao.error.ErrorCode;
 import com.sigma.dao.error.exception.ProtocolException;
 import com.sigma.dao.model.NetworkConfig;
 import com.sigma.dao.repository.NetworkConfigRepository;
@@ -43,14 +44,6 @@ public class NetworkConfigService {
         networkConfigRepository.save(get().setUuidSeed(get().getUuidSeed() + 1));
     }
 
-    public void proposeNetworkConfigChange() {
-
-    }
-
-    public void voteOnNetworkConfigChange() {
-
-    }
-
     /**
      * Fetches the network config
      *
@@ -58,6 +51,6 @@ public class NetworkConfigService {
      */
     public NetworkConfig get() {
         return networkConfigRepository.findAll().stream().findFirst()
-                .orElseThrow(() -> new ProtocolException("The network config is missing."));
+                .orElseThrow(() -> new ProtocolException(ErrorCode.E0023));
     }
 }
