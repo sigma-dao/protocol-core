@@ -43,7 +43,9 @@ public class AssetService {
      *
      * @return the new {@link Asset}
      */
-    public Asset add(AddAssetRequest request) {
+    public Asset add(
+            final AddAssetRequest request
+    ) {
         if(request.getBlockchain() == null) {
             throw new ProtocolException(ErrorCode.E0017);
         }
