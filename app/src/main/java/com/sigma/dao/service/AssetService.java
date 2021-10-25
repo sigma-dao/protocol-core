@@ -12,8 +12,11 @@ import com.sigma.dao.request.AddAssetRequest;
 import com.sigma.dao.request.RemoveAssetRequest;
 import com.sigma.dao.utils.UUIDUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -33,6 +36,21 @@ public class AssetService {
         this.fundRepository = fundRepository;
         this.governanceService = governanceService;
         this.uuidUtils = uuidUtils;
+    }
+
+    /**
+     * Returns a list of {@link Asset}s
+     *
+     * @param request {@link GetAssetsRequest}
+     *
+     * @return {@link List} of {@link Asset}s
+     */
+    public List<Asset> get(
+            final GetAssetsRequest request
+    ) {
+        final PageRequest page = PageRequest.of(request.getSize(), request.getPage(),
+                Sort.Direction.valueOf(request.getSort()));
+        return assetRepository.findAll(page).toList();
     }
 
     /**

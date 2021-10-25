@@ -3,12 +3,15 @@ package com.sigma.dao.controller;
 import com.sigma.dao.SigmaDAO;
 import com.sigma.dao.constant.Blockchain;
 import com.sigma.dao.error.ErrorCode;
+import com.sigma.dao.model.Asset;
+import com.sigma.dao.repository.AssetRepository;
 import com.sigma.dao.request.AddAssetRequest;
 import com.sigma.dao.request.SignedRequest;
 import com.sigma.dao.response.ErrorResponse;
 import com.sigma.dao.service.NetworkConfigService;
 import com.sigma.dao.utils.JSONUtils;
 import org.json.JSONObject;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
@@ -39,6 +42,8 @@ public class AssetControllerTest {
     private JSONUtils jsonUtils;
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private AssetRepository assetRepository;
 
     @Before
     public void setup() {
@@ -52,6 +57,7 @@ public class AssetControllerTest {
                         .put("uuidSeed", 1));
         networkConfigService.initializeNetworkConfig(appState);
         networkConfigService.setTimestamp(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
+        assetRepository.deleteAll();
     }
 
     private void testAddAssetMissingField(SignedRequest request, String error) throws Exception {
@@ -167,8 +173,7 @@ public class AssetControllerTest {
         testAddAssetMissingField(request, ErrorCode.E0040);
     }
 
-    @Test
-    public void testAddAsset() throws Exception {
+    private MockHttpServletResponse addAsset() throws Exception {
         SignedRequest request = new AddAssetRequest()
                 .setContractAddress("0x0")
                 .setBlockchain(Blockchain.ETHEREUM.toString())
@@ -178,27 +183,31 @@ public class AssetControllerTest {
                 .setEnactmentDate(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) + 3000)
                 .setPublicKey("0x0")
                 .setSignature("0x0");
-        MockHttpServletResponse response = mockMvc.perform(post("/asset")
+        return mockMvc.perform(post("/asset")
                         .contentType(MediaType.APPLICATION_JSON).content(jsonUtils.toJson(request)))
                 .andReturn().getResponse();
-        Assertions.assertEquals(response.getStatus(), 200);
-        // TODO - check response
     }
 
-//    @Test
-//    public void testAddAssetDuplicated() {
-//        Mockito.when(assetRepository.findByBlockchainAndContractAddress(
-//                Mockito.any(Blockchain.class), Mockito.any())).thenReturn(List.of(new Asset()));
-//        try {
-//            assetService.add(new AddAssetRequest()
-//                    .setBlockchain(Blockchain.ETHEREUM)
-//                    .setContractAddress("0x0")
-//                    .setSymbol("XYZ"));
-//            Assertions.fail();
-//        } catch(Exception e) {
-//            Assertions.assertEquals(ErrorCode.E0022, e.getMessage());
-//        }
-//    }
+    @Test
+    public void testAddAsset() throws Exception {
+        MockHttpServletResponse response = addAsset();
+        Assertions.assertEquals(response.getStatus(), 200);
+        Asset asset = jsonUtils.fromJson(response.getContentAsString(), Asset.class);
+        Assert.assertNotNull(asset.getId());
+        // TODO - should test reading the assets and governance proposals
+    }
+
+    @Test
+    public void testAddAssetDuplicated() throws Exception {
+        MockHttpServletResponse response = addAsset();
+        Assertions.assertEquals(response.getStatus(), 200);
+        Asset asset = jsonUtils.fromJson(response.getContentAsString(), Asset.class);
+        Assert.assertNotNull(asset.getId());
+        response = addAsset();
+        Assertions.assertEquals(response.getStatus(), 500);
+        ErrorResponse errorResponse = jsonUtils.fromJson(response.getContentAsString(), ErrorResponse.class);
+        Assert.assertEquals(errorResponse.getError(), ErrorCode.E0022);
+    }
 
 //
 //    @Test
