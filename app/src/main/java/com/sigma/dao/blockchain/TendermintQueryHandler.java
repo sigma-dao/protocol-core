@@ -3,9 +3,10 @@ package com.sigma.dao.blockchain;
 import com.sigma.dao.constant.TendermintQuery;
 import com.sigma.dao.error.ErrorCode;
 import com.sigma.dao.error.exception.ProtocolException;
-import com.sigma.dao.model.Asset;
 import com.sigma.dao.model.Fund;
 import com.sigma.dao.model.NetworkConfig;
+import com.sigma.dao.request.PaginatedRequest;
+import com.sigma.dao.response.GetAssetsResponse;
 import com.sigma.dao.service.AssetService;
 import com.sigma.dao.service.FundService;
 import com.sigma.dao.service.NetworkConfigService;
@@ -44,14 +45,14 @@ public class TendermintQueryHandler {
     public String process(TendermintQuery query, JSONObject jsonObject) {
         JSONObject payload = jsonObject.optJSONObject("payload");
         if(query.equals(TendermintQuery.GET_FUNDS)) {
-            List<Fund> funds = fundService.get();
+            List<Fund> funds = fundService.get(jsonUtils.fromJson(payload.toString(), PaginatedRequest.class));
             return jsonUtils.toJson(funds);
         } else if(query.equals(TendermintQuery.GET_NETWORK_CONFIG)) {
             NetworkConfig networkConfig = networkConfigService.get();
             return jsonUtils.toJson(networkConfig);
         } else if(query.equals(TendermintQuery.GET_ASSETS)) {
-            List<Asset> assets = assetService.get(jsonUtils.fromJson(payload.toString(), GetAssetsRequest.class));
-            return jsonUtils.toJson(assets);
+            GetAssetsResponse response = assetService.get(jsonUtils.fromJson(payload.toString(), PaginatedRequest.class));
+            return jsonUtils.toJson(response);
         }
         throw new ProtocolException(ErrorCode.E0016);
     }

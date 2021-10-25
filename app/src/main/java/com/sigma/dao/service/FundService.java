@@ -9,9 +9,12 @@ import com.sigma.dao.model.Fund;
 import com.sigma.dao.repository.AssetRepository;
 import com.sigma.dao.repository.FundRepository;
 import com.sigma.dao.request.CreateFundRequest;
+import com.sigma.dao.request.PaginatedRequest;
 import com.sigma.dao.request.UpdateFundRequest;
 import com.sigma.dao.utils.UUIDUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,10 +44,16 @@ public class FundService {
     /**
      * Returns all of the {@link Fund}s
      *
+     * @param request {@link PaginatedRequest}
+     *
      * @return a {@link List} of {@link Fund}s
      */
-    public List<Fund> get() {
-        return this.fundRepository.findAll();
+    public List<Fund> get(
+            final PaginatedRequest request
+    ) {
+        final PageRequest page = PageRequest.of(request.getPage(), request.getSize(),
+                Sort.Direction.valueOf(request.getSort()), "id");
+        return this.fundRepository.findAll(page).toList();
     }
 
     /**

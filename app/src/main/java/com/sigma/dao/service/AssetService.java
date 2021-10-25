@@ -9,14 +9,15 @@ import com.sigma.dao.model.Asset;
 import com.sigma.dao.repository.AssetRepository;
 import com.sigma.dao.repository.FundRepository;
 import com.sigma.dao.request.AddAssetRequest;
+import com.sigma.dao.request.PaginatedRequest;
 import com.sigma.dao.request.RemoveAssetRequest;
+import com.sigma.dao.response.GetAssetsResponse;
 import com.sigma.dao.utils.UUIDUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -39,18 +40,18 @@ public class AssetService {
     }
 
     /**
-     * Returns a list of {@link Asset}s
+     * Returns a list of assets
      *
-     * @param request {@link GetAssetsRequest}
+     * @param request {@link PaginatedRequest}
      *
-     * @return {@link List} of {@link Asset}s
+     * @return {@link GetAssetsResponse}
      */
-    public List<Asset> get(
-            final GetAssetsRequest request
+    public GetAssetsResponse get(
+            final PaginatedRequest request
     ) {
-        final PageRequest page = PageRequest.of(request.getSize(), request.getPage(),
-                Sort.Direction.valueOf(request.getSort()));
-        return assetRepository.findAll(page).toList();
+        final PageRequest page = PageRequest.of(request.getPage(), request.getSize(),
+                Sort.Direction.valueOf(request.getSort()), "symbol");
+        return new GetAssetsResponse().setAssets(assetRepository.findAll(page).toList());
     }
 
     /**

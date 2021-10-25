@@ -1,5 +1,6 @@
 package com.sigma.dao.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sigma.dao.SigmaDAO;
 import com.sigma.dao.constant.Blockchain;
 import com.sigma.dao.error.ErrorCode;
@@ -8,6 +9,7 @@ import com.sigma.dao.repository.AssetRepository;
 import com.sigma.dao.request.AddAssetRequest;
 import com.sigma.dao.request.SignedRequest;
 import com.sigma.dao.response.ErrorResponse;
+import com.sigma.dao.response.GetAssetsResponse;
 import com.sigma.dao.service.NetworkConfigService;
 import com.sigma.dao.utils.JSONUtils;
 import org.json.JSONObject;
@@ -27,7 +29,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Collections;
+import java.util.List;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @ActiveProfiles("test")
@@ -188,13 +193,25 @@ public class AssetControllerTest {
                 .andReturn().getResponse();
     }
 
+    private List<Asset> getAssets() {
+        try {
+            String content = mockMvc.perform(get("/asset?size=100&page=0&sort=ASC")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andReturn().getResponse().getContentAsString();
+            return new ObjectMapper().readValue(content, GetAssetsResponse.class).getAssets();
+        } catch(Exception e) {
+            return Collections.emptyList();
+        }
+    }
+
     @Test
     public void testAddAsset() throws Exception {
         MockHttpServletResponse response = addAsset();
         Assertions.assertEquals(response.getStatus(), 200);
         Asset asset = jsonUtils.fromJson(response.getContentAsString(), Asset.class);
         Assert.assertNotNull(asset.getId());
-        // TODO - should test reading the assets and governance proposals
+        List<Asset> assets = getAssets();
+        Assertions.assertEquals(1, assets.size());
     }
 
     @Test

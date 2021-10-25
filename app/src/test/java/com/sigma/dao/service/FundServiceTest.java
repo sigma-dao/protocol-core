@@ -375,11 +375,11 @@ public class FundServiceTest {
 //        Assertions.assertNotNull(fund);
 //    }
 
-    @Test
-    public void testGetFunds() {
-        UUID id = UUID.randomUUID();
-        Mockito.when(fundRepository.findAll()).thenReturn(List.of(new Fund().setId(id)));
-        List<Fund> funds = fundService.get();
-        Assertions.assertEquals(id, funds.get(0).getId());
-    }
+//    @Test
+//    public void testGetFunds() {
+//        UUID id = UUID.randomUUID();
+//        Mockito.when(fundRepository.findAll()).thenReturn(List.of(new Fund().setId(id)));
+//        List<Fund> funds = fundService.get();
+//        Assertions.assertEquals(id, funds.get(0).getId());
+//    }
 }
