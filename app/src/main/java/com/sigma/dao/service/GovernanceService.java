@@ -10,11 +10,14 @@ import com.sigma.dao.repository.GovernanceActionRepository;
 import com.sigma.dao.repository.GovernanceVoteRepository;
 import com.sigma.dao.repository.UserRepository;
 import com.sigma.dao.request.GovernanceVoteRequest;
+import com.sigma.dao.request.PaginatedRequest;
+import com.sigma.dao.response.GetGovernanceActionsResponse;
 import com.sigma.dao.utils.UUIDUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -44,12 +47,19 @@ public class GovernanceService {
     }
 
     /**
-     * Get all {@link GovernanceAction}s
+     * Get all governance actions
      *
-     * @return {@link List} of {@link GovernanceAction}s
+     * @param request {@link PaginatedRequest}
+     *
+     * @return {@link GetGovernanceActionsResponse}
      */
-    public List<GovernanceAction> get() {
-        return governanceActionRepository.findAll();
+    public GetGovernanceActionsResponse getActions(
+            final PaginatedRequest request
+    ) {
+        final PageRequest page = PageRequest.of(request.getPage(), request.getSize(),
+                Sort.Direction.valueOf(request.getSort()), "entityId");
+        return new GetGovernanceActionsResponse().setGovernanceActions(
+                governanceActionRepository.findAll(page).toList());
     }
 
     /**

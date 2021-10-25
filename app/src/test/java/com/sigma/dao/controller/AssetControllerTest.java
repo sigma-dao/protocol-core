@@ -3,13 +3,17 @@ package com.sigma.dao.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sigma.dao.SigmaDAO;
 import com.sigma.dao.constant.Blockchain;
+import com.sigma.dao.constant.GovernanceActionType;
+import com.sigma.dao.constant.GovernanceStatus;
 import com.sigma.dao.error.ErrorCode;
 import com.sigma.dao.model.Asset;
+import com.sigma.dao.model.GovernanceAction;
 import com.sigma.dao.repository.AssetRepository;
 import com.sigma.dao.request.AddAssetRequest;
 import com.sigma.dao.request.SignedRequest;
 import com.sigma.dao.response.ErrorResponse;
 import com.sigma.dao.response.GetAssetsResponse;
+import com.sigma.dao.response.GetGovernanceActionsResponse;
 import com.sigma.dao.service.NetworkConfigService;
 import com.sigma.dao.utils.JSONUtils;
 import org.json.JSONObject;
@@ -204,6 +208,17 @@ public class AssetControllerTest {
         }
     }
 
+    private List<GovernanceAction> getGovernanceActions() {
+        try {
+            String content = mockMvc.perform(get("/governance/actions?size=100&page=0&sort=ASC")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andReturn().getResponse().getContentAsString();
+            return new ObjectMapper().readValue(content, GetGovernanceActionsResponse.class).getGovernanceActions();
+        } catch(Exception e) {
+            return Collections.emptyList();
+        }
+    }
+
     @Test
     public void testAddAsset() throws Exception {
         MockHttpServletResponse response = addAsset();
@@ -212,6 +227,11 @@ public class AssetControllerTest {
         Assert.assertNotNull(asset.getId());
         List<Asset> assets = getAssets();
         Assertions.assertEquals(1, assets.size());
+        Assertions.assertEquals(assets.get(0).getStatus(), GovernanceStatus.SUBMITTED);
+        List<GovernanceAction> governanceActions = getGovernanceActions();
+        Assert.assertEquals(1, governanceActions.size());
+        Assert.assertEquals(governanceActions.get(0).getEntityId(), assets.get(0).getId());
+        Assert.assertEquals(governanceActions.get(0).getType(), GovernanceActionType.ADD_ASSET);
     }
 
     @Test

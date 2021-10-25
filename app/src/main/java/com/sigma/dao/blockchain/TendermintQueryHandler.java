@@ -7,8 +7,10 @@ import com.sigma.dao.model.Fund;
 import com.sigma.dao.model.NetworkConfig;
 import com.sigma.dao.request.PaginatedRequest;
 import com.sigma.dao.response.GetAssetsResponse;
+import com.sigma.dao.response.GetGovernanceActionsResponse;
 import com.sigma.dao.service.AssetService;
 import com.sigma.dao.service.FundService;
+import com.sigma.dao.service.GovernanceService;
 import com.sigma.dao.service.NetworkConfigService;
 import com.sigma.dao.utils.JSONUtils;
 import org.json.JSONObject;
@@ -23,15 +25,18 @@ public class TendermintQueryHandler {
     private final NetworkConfigService networkConfigService;
     private final AssetService assetService;
     private final JSONUtils jsonUtils;
+    private final GovernanceService governanceService;
 
     public TendermintQueryHandler(FundService fundService,
                                   NetworkConfigService networkConfigService,
                                   AssetService assetService,
-                                  JSONUtils jsonUtils) {
+                                  JSONUtils jsonUtils,
+                                  GovernanceService governanceService) {
         this.fundService = fundService;
         this.networkConfigService = networkConfigService;
         this.assetService = assetService;
         this.jsonUtils = jsonUtils;
+        this.governanceService = governanceService;
     }
 
     /**
@@ -52,6 +57,9 @@ public class TendermintQueryHandler {
             return jsonUtils.toJson(networkConfig);
         } else if(query.equals(TendermintQuery.GET_ASSETS)) {
             GetAssetsResponse response = assetService.get(jsonUtils.fromJson(payload.toString(), PaginatedRequest.class));
+            return jsonUtils.toJson(response);
+        } else if(query.equals(TendermintQuery.GET_GOVERNANCE_ACTIONS)) {
+            GetGovernanceActionsResponse response = governanceService.getActions(jsonUtils.fromJson(payload.toString(), PaginatedRequest.class));
             return jsonUtils.toJson(response);
         }
         throw new ProtocolException(ErrorCode.E0016);
