@@ -11,9 +11,8 @@ public final class ErrorCode {
     public static final String E0008 = "ID is a mandatory field.";
     public static final String E0009 = "Fund cannot be found with specified ID.";
     public static final String E0010 = "Fund can only be updated when status = PROPOSED";
-    public static final String E0011 = "Fund activation date cannot be changed.";
-    public static final String E0012 = "Activation date is a mandatory field.";
-    public static final String E0013 = "Activation date is too soon.";
+    public static final String E0012 = "Enactment date is a mandatory field.";
+    public static final String E0013 = "Enactment date is too soon.";
     public static final String E0014 = "Fund status cannot be changed.";
     public static final String E0015 = "Unsupported Tendermint transaction.";
     public static final String E0016 = "Unsupported Tendermint query.";
@@ -28,4 +27,9 @@ public final class ErrorCode {
     public static final String E0025 = "Governance action cannot be found with specified ID.";
     public static final String E0026 = "User not found with public key.";
     public static final String E0027 = "Signature is invalid.";
+    public static final String E0028 = "Enactment date cannot be in the past.";
+    public static final String E0029 = "Opening date cannot be in the past.";
+    public static final String E0030 = "Closing date cannot be in the past.";
+    public static final String E0031 = "Closing date cannot be before opening date.";
+    public static final String E0032 = "Enactment date cannot be before opening date.";
 }

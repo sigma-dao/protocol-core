@@ -18,10 +18,16 @@ public class NetworkConfig {
     @JsonIgnore
     @Column(name = "id", updatable = false, nullable = false)
     private Long id = 1L;
-    @Column(name = "min_fund_activation_time", nullable = false)
-    private Long minFundActivationTime;
     @Column(name = "uuid_seed", nullable = false)
     private Long uuidSeed;
     @Column(name = "governance_token_address", nullable = false)
     private String governanceTokenAddress;
+    @Column(name = "min_fund_enactment_delay", nullable = false)
+    private Long minFundEnactmentDelay;
+    @Column(name = "max_fund_enactment_delay", nullable = false)
+    private Long maxFundEnactmentDelay;
+    @Column(name = "min_asset_enactment_delay", nullable = false)
+    private Long minAssetEnactmentDelay;
+    @Column(name = "max_asset_enactment_delay", nullable = false)
+    private Long maxAssetEnactmentDelay;
 }

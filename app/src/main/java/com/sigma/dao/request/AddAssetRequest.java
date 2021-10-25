@@ -8,7 +8,7 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Accessors(chain = true)
-public class AddAssetRequest extends SignedRequest {
+public class AddAssetRequest extends GovernanceActionRequest {
     private Blockchain blockchain;
     private String symbol;
     private String contractAddress;

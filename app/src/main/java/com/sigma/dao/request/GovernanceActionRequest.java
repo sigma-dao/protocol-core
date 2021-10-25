@@ -7,6 +7,8 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Accessors(chain = true)
-public class UpdateFundRequest extends GovernanceActionRequest {
-
+public abstract class GovernanceActionRequest extends SignedRequest {
+    protected Long enactmentDate;
+    protected Long openingDate;
+    protected Long closingDate;
 }

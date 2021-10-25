@@ -9,6 +9,8 @@ import com.sigma.dao.error.exception.ProtocolException;
 import com.sigma.dao.model.Asset;
 import com.sigma.dao.model.Fund;
 import com.sigma.dao.request.AddAssetRequest;
+import com.sigma.dao.request.CreateFundRequest;
+import com.sigma.dao.request.UpdateFundRequest;
 import com.sigma.dao.service.*;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
@@ -54,10 +56,10 @@ public class TendermintTransactionHandler {
                               JSONObject jsonObject) throws JsonProcessingException {
         String payload = jsonObject.getJSONObject("payload").toString();
         if(transaction.equals(TendermintTransaction.CREATE_FUND)) {
-            Fund fund = fundService.create(objectMapper.readValue(payload, Fund.class));
+            Fund fund = fundService.create(objectMapper.readValue(payload, CreateFundRequest.class));
             return ByteString.copyFromUtf8(objectMapper.writeValueAsString(fund));
         } else if(transaction.equals(TendermintTransaction.UPDATE_FUND)) {
-            Fund fund = fundService.update(objectMapper.readValue(payload, Fund.class));
+            Fund fund = fundService.update(objectMapper.readValue(payload, UpdateFundRequest.class));
             return ByteString.copyFromUtf8(objectMapper.writeValueAsString(fund));
         } else if(transaction.equals(TendermintTransaction.ADD_ASSET)) {
             Asset asset = assetService.add(objectMapper.readValue(payload, AddAssetRequest.class));

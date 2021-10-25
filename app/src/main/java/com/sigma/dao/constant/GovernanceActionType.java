@@ -1,5 +1,5 @@
 package com.sigma.dao.constant;
 
 public enum GovernanceActionType {
-    ADD_ASSET, REMOVE_ASSET
+    ADD_ASSET, CREATE_FUND, REMOVE_ASSET
 }

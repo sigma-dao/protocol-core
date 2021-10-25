@@ -1,5 +1,6 @@
 package com.sigma.dao.service;
 
+import com.sigma.dao.constant.GovernanceActionType;
 import com.sigma.dao.error.ErrorCode;
 import com.sigma.dao.error.exception.ProtocolException;
 import com.sigma.dao.model.GovernanceAction;
@@ -14,10 +15,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
-public class GovernanceActionService {
+public class GovernanceService {
 
     private final GovernanceActionRepository governanceActionRepository;
     private final UserRepository userRepository;
@@ -26,12 +28,12 @@ public class GovernanceActionService {
     private final AuthenticationService authenticationService;
     private final UUIDUtils uuidUtils;
 
-    public GovernanceActionService(GovernanceActionRepository governanceActionRepository,
-                                   UserRepository userRepository,
-                                   GovernanceVoteRepository governanceVoteRepository,
-                                   NetworkConfigService networkConfigService,
-                                   AuthenticationService authenticationService,
-                                   UUIDUtils uuidUtils) {
+    public GovernanceService(GovernanceActionRepository governanceActionRepository,
+                             UserRepository userRepository,
+                             GovernanceVoteRepository governanceVoteRepository,
+                             NetworkConfigService networkConfigService,
+                             AuthenticationService authenticationService,
+                             UUIDUtils uuidUtils) {
         this.governanceActionRepository = governanceActionRepository;
         this.userRepository = userRepository;
         this.governanceVoteRepository = governanceVoteRepository;
@@ -59,6 +61,9 @@ public class GovernanceActionService {
     public GovernanceAction vote(
             final GovernanceVoteRequest request
     ) {
+        if(!authenticationService.validSignature(request)) {
+            throw new ProtocolException(ErrorCode.E0027);
+        }
         if(request.getGovernanceActionId() == null) {
             throw new ProtocolException(ErrorCode.E0008);
         }
@@ -66,9 +71,6 @@ public class GovernanceActionService {
                 .orElseThrow(() -> new ProtocolException(ErrorCode.E0025));
         User user = userRepository.findByPublicKey(request.getPublicKey())
                 .orElseThrow(() -> new ProtocolException(ErrorCode.E0026));
-        if(!authenticationService.validSignature(request)) {
-            throw new ProtocolException(ErrorCode.E0027);
-        }
         if(request.getVoteFor()) {
             governanceAction.setVotesFor(governanceAction.getVotesFor() + user.getStake());
         } else {
@@ -79,6 +81,40 @@ public class GovernanceActionService {
                 .setUser(user)
                 .setTimestamp(networkConfigService.getTimestamp())
                 .setId(uuidUtils.next()));
+        // TODO - check if the governance vote has passed the required threshold
         return governanceActionRepository.save(governanceAction);
+    }
+
+    public void create(
+            final UUID entityId,
+            final GovernanceActionType type,
+            final Long enactmentDate,
+            final Long openingDate,
+            final Long closingDate
+    ) {
+        long ts = networkConfigService.getTimestamp();
+        if(enactmentDate < ts) {
+            throw new ProtocolException(ErrorCode.E0028);
+        }
+        if(openingDate < ts) {
+            throw new ProtocolException(ErrorCode.E0029);
+        }
+        if(closingDate < ts) {
+            throw new ProtocolException(ErrorCode.E0030);
+        }
+        if(closingDate < openingDate) {
+            throw new ProtocolException(ErrorCode.E0031);
+        }
+        if(enactmentDate < openingDate) {
+            throw new ProtocolException(ErrorCode.E0032);
+        }
+        governanceActionRepository.save(new GovernanceAction()
+                .setEntityId(entityId)
+                .setVotesFor(0)
+                .setVotesAgainst(0)
+                .setEnactmentDate(enactmentDate)
+                .setOpeningDate(openingDate)
+                .setClosingDate(closingDate)
+                .setType(type));
     }
 }

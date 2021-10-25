@@ -27,7 +27,7 @@ public class NetworkConfigServiceTest {
     public void testInitializeNetworkConfig() {
         JSONObject appState = new JSONObject()
                 .put("networkConfig", new JSONObject()
-                        .put("minFundActivationTime", 1)
+                        .put("minFundEnactmentDelay", 1)
                         .put("uuidSeed", 1));
         try {
             networkConfigService.initializeNetworkConfig(appState);
