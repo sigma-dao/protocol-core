@@ -3,7 +3,6 @@ package com.sigma.dao.service;
 import com.sigma.dao.model.Fund;
 import com.sigma.dao.repository.AssetRepository;
 import com.sigma.dao.repository.FundRepository;
-import com.sigma.dao.repository.GovernanceActionRepository;
 import com.sigma.dao.utils.UUIDUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +19,7 @@ public class FundServiceTest {
     private NetworkConfigService networkConfigService;
     private AssetRepository assetRepository;
     private UUIDUtils uuidUtils;
-    private GovernanceActionRepository governanceActionRepository;
+    private GovernanceService governanceService;
 
     @Before
     public void setup() {
@@ -28,8 +27,8 @@ public class FundServiceTest {
         fundRepository = Mockito.mock(FundRepository.class);
         networkConfigService = Mockito.mock(NetworkConfigService.class);
         assetRepository = Mockito.mock(AssetRepository.class);
-        governanceActionRepository = Mockito.mock(GovernanceActionRepository.class);
-        fundService = new FundService(fundRepository, networkConfigService, assetRepository, uuidUtils, governanceActionRepository);
+        governanceService = Mockito.mock(GovernanceService.class);
+        fundService = new FundService(fundRepository, networkConfigService, assetRepository, uuidUtils, governanceService);
     }
 //
 //    @Test

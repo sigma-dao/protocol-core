@@ -32,4 +32,13 @@ public final class ErrorCode {
     public static final String E0030 = "Closing date cannot be in the past.";
     public static final String E0031 = "Closing date cannot be before opening date.";
     public static final String E0032 = "Enactment date cannot be before opening date.";
+    public static final String E0033 = "Opening date is a mandatory field.";
+    public static final String E0034 = "Closing date is a mandatory field.";
+    public static final String E0035 = "Cannot update this fund because an update is already pending.";
+    public static final String E0036 = "Cannot update this fund because it was rejected during governance voting.";
+    public static final String E0037 = "Governance action ID is a mandatory field";
+    public static final String E0038 = "Vote for/against is a mandatory field";
+    public static final String E0039 = "Enactment date is a mandatory field";
+    public static final String E0040 = "Signature is a mandatory field.";
+    public static final String E0041 = "Public key is a mandatory field.";
 }

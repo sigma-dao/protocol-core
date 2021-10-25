@@ -83,7 +83,8 @@ public class AssetService {
         if(request.getId() == null) {
             throw new ProtocolException(ErrorCode.E0008);
         }
-        Asset asset = assetRepository.findById(request.getId()).orElseThrow(() -> new ProtocolException(ErrorCode.E0021));
+        Asset asset = assetRepository.findById(request.getId())
+                .orElseThrow(() -> new ProtocolException(ErrorCode.E0021));
         boolean assetInUse = fundRepository.findBySubscriptionAsset(asset).stream()
                 .anyMatch(f -> !f.getStatus().equals(GovernanceStatus.REJECTED));
         if(assetInUse) {

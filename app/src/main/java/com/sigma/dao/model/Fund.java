@@ -37,4 +37,14 @@ public class Fund {
     private Long redemptionFrequency;
     @Column(name = "termination_date")
     private Long terminationDate;
+    @Column(name = "proposed_minimum_subscription")
+    private Long proposedMinimumSubscription;
+    @Column(name = "proposed_disbursement_frequency")
+    private Long proposedDisbursementFrequency;
+    @Column(name = "proposed_management_fee")
+    private Integer proposedManagementFee;
+    @Column(name = "proposed_performance_fee")
+    private Integer proposedPerformanceFee;
+    @Column(name = "proposed_redemption_frequency")
+    private Long proposedRedemptionFrequency;
 }
