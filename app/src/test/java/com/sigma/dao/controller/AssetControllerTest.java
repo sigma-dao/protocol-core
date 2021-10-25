@@ -1,4 +1,4 @@
-package com.sigma.dao.service;
+package com.sigma.dao.controller;
 
 import com.sigma.dao.SigmaDAO;
 import com.sigma.dao.constant.Blockchain;
@@ -6,6 +6,7 @@ import com.sigma.dao.error.ErrorCode;
 import com.sigma.dao.request.AddAssetRequest;
 import com.sigma.dao.request.SignedRequest;
 import com.sigma.dao.response.ErrorResponse;
+import com.sigma.dao.service.NetworkConfigService;
 import com.sigma.dao.utils.JSONUtils;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -16,21 +17,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test")
-@SpringBootTest(classes = SigmaDAO.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = SigmaDAO.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
-public class AssetServiceTest {
+public class AssetControllerTest {
 
-    @Autowired
-    private AssetService assetService;
     @Autowired
     private NetworkConfigService networkConfigService;
     @Autowired
@@ -49,23 +51,20 @@ public class AssetServiceTest {
                         .put("maxAssetEnactmentDelay", 1)
                         .put("uuidSeed", 1));
         networkConfigService.initializeNetworkConfig(appState);
+        networkConfigService.setTimestamp(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
     }
 
-    private void testAddAssetMissingField(SignedRequest request, String error) {
-        try {
-            String content = mockMvc.perform(post("/asset")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(jsonUtils.toJson(request))).andExpect(status().is5xxServerError())
-                    .andReturn().getResponse().getContentAsString();
-            ErrorResponse errorResponse = jsonUtils.fromJson(content, ErrorResponse.class);
-            Assertions.assertEquals(errorResponse.getError(), error);
-        } catch (Exception e) {
-            Assertions.fail(e.getMessage());
-        }
+    private void testAddAssetMissingField(SignedRequest request, String error) throws Exception {
+        MockHttpServletResponse response = mockMvc.perform(post("/asset")
+                        .contentType(MediaType.APPLICATION_JSON).content(jsonUtils.toJson(request)))
+                .andReturn().getResponse();
+        Assertions.assertEquals(response.getStatus(), 500);
+        ErrorResponse errorResponse = jsonUtils.fromJson(response.getContentAsString(), ErrorResponse.class);
+        Assertions.assertEquals(errorResponse.getError(), error);
     }
 
     @Test
-    public void testAddAssetMissingBlockchain() {
+    public void testAddAssetMissingBlockchain() throws Exception {
         SignedRequest request = new AddAssetRequest()
                 .setSymbol("BTC")
                 .setContractAddress("0x0")
@@ -78,7 +77,7 @@ public class AssetServiceTest {
     }
 
     @Test
-    public void testAddAssetMissingContractAddress() {
+    public void testAddAssetMissingContractAddress() throws Exception {
         SignedRequest request = new AddAssetRequest()
                 .setSymbol("BTC")
                 .setBlockchain(Blockchain.ETHEREUM.toString())
@@ -91,7 +90,7 @@ public class AssetServiceTest {
     }
 
     @Test
-    public void testAddAssetMissingSymbol() {
+    public void testAddAssetMissingSymbol() throws Exception {
         SignedRequest request = new AddAssetRequest()
                 .setContractAddress("0x0")
                 .setBlockchain(Blockchain.ETHEREUM.toString())
@@ -101,6 +100,89 @@ public class AssetServiceTest {
                 .setPublicKey("0x0")
                 .setSignature("0x0");
         testAddAssetMissingField(request, ErrorCode.E0019);
+    }
+
+    @Test
+    public void testAddAssetMissingClosingDate() throws Exception {
+        SignedRequest request = new AddAssetRequest()
+                .setContractAddress("0x0")
+                .setBlockchain(Blockchain.ETHEREUM.toString())
+                .setSymbol("BTC")
+                .setOpeningDate(1L)
+                .setEnactmentDate(1L)
+                .setPublicKey("0x0")
+                .setSignature("0x0");
+        testAddAssetMissingField(request, ErrorCode.E0034);
+    }
+
+    @Test
+    public void testAddAssetMissingOpeningDate() throws Exception {
+        SignedRequest request = new AddAssetRequest()
+                .setContractAddress("0x0")
+                .setBlockchain(Blockchain.ETHEREUM.toString())
+                .setSymbol("BTC")
+                .setClosingDate(1L)
+                .setEnactmentDate(1L)
+                .setPublicKey("0x0")
+                .setSignature("0x0");
+        testAddAssetMissingField(request, ErrorCode.E0033);
+    }
+
+    @Test
+    public void testAddAssetMissingEnactmentDate() throws Exception {
+        SignedRequest request = new AddAssetRequest()
+                .setContractAddress("0x0")
+                .setBlockchain(Blockchain.ETHEREUM.toString())
+                .setSymbol("BTC")
+                .setClosingDate(1L)
+                .setOpeningDate(1L)
+                .setPublicKey("0x0")
+                .setSignature("0x0");
+        testAddAssetMissingField(request, ErrorCode.E0039);
+    }
+
+    @Test
+    public void testAddAssetMissingPublicKey() throws Exception {
+        SignedRequest request = new AddAssetRequest()
+                .setContractAddress("0x0")
+                .setBlockchain(Blockchain.ETHEREUM.toString())
+                .setSymbol("BTC")
+                .setClosingDate(1L)
+                .setOpeningDate(1L)
+                .setEnactmentDate(1L)
+                .setSignature("0x0");
+        testAddAssetMissingField(request, ErrorCode.E0041);
+    }
+
+    @Test
+    public void testAddAssetMissingSignature() throws Exception {
+        SignedRequest request = new AddAssetRequest()
+                .setContractAddress("0x0")
+                .setBlockchain(Blockchain.ETHEREUM.toString())
+                .setSymbol("BTC")
+                .setClosingDate(1L)
+                .setOpeningDate(1L)
+                .setEnactmentDate(1L)
+                .setPublicKey("0x0");
+        testAddAssetMissingField(request, ErrorCode.E0040);
+    }
+
+    @Test
+    public void testAddAsset() throws Exception {
+        SignedRequest request = new AddAssetRequest()
+                .setContractAddress("0x0")
+                .setBlockchain(Blockchain.ETHEREUM.toString())
+                .setSymbol("BTC")
+                .setClosingDate(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) + 2000)
+                .setOpeningDate(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) + 1000)
+                .setEnactmentDate(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) + 3000)
+                .setPublicKey("0x0")
+                .setSignature("0x0");
+        MockHttpServletResponse response = mockMvc.perform(post("/asset")
+                        .contentType(MediaType.APPLICATION_JSON).content(jsonUtils.toJson(request)))
+                .andReturn().getResponse();
+        Assertions.assertEquals(response.getStatus(), 200);
+        // TODO - check response
     }
 
 //    @Test
@@ -118,20 +200,6 @@ public class AssetServiceTest {
 //        }
 //    }
 
-//    @Test
-//    public void testAddAsset() {
-//        Mockito.when(assetRepository.findByBlockchainAndContractAddress(
-//                Mockito.any(Blockchain.class), Mockito.any())).thenReturn(List.of());
-//        Mockito.when(assetRepository.save(Mockito.any(Asset.class))).thenReturn(new Asset());
-//        Mockito.when(governanceActionRepository.save(Mockito.any(GovernanceAction.class)))
-//                .thenReturn(new GovernanceAction());
-//        Asset asset = assetService.add(new AddAssetRequest()
-//                .setBlockchain(Blockchain.ETHEREUM)
-//                .setContractAddress("0x0")
-//                .setSymbol("XYZ"));
-//        Assertions.assertNotNull(asset);
-//        Mockito.verify(governanceActionRepository, Mockito.times(1)).save(Mockito.any());
-//    }
 //
 //    @Test
 //    public void testRemoveAssetMissingID() {

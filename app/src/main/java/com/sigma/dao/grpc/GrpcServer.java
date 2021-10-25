@@ -37,12 +37,12 @@ public class GrpcServer {
         log.info("gRPC server started, listening on {}", this.port);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             log.info("Shutting down gRPC server since JVM is shutting down");
-            GrpcServer.this.stop();
+            stop();
             log.info("gRPC server shut down");
         }));
     }
 
-    public void stop() {
+    private void stop() {
         server.shutdown();
     }
 

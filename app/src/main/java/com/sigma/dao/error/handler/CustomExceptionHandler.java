@@ -19,19 +19,8 @@ import java.util.Objects;
 @Slf4j
 @ControllerAdvice
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> error(Exception ex, WebRequest request) {
-        log.error(ex.getMessage(), ex);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse().setError(ex.getMessage()).setCode("E9999"));
-    }
-    @Override
-    protected @NotNull ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex,
-            @NotNull HttpHeaders headers,
-            @NotNull HttpStatus status,
-            @NotNull WebRequest request) {
-        String error = Objects.requireNonNull(ex.getBindingResult().getFieldError()).getDefaultMessage();
+
+    private String getCode(String error) {
         final String[] code = {"E9999"};
         Arrays.stream(ErrorCode.class.getDeclaredFields()).forEach(field -> {
             try {
@@ -43,7 +32,24 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                 // do nothing
             }
         });
+        return code[0];
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> error(Exception ex, WebRequest request) {
+        log.error(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse().setError(error).setCode(code[0]));
+                .body(new ErrorResponse().setError(ex.getMessage()).setCode(getCode(ex.getMessage())));
+    }
+
+    @Override
+    protected @NotNull ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex,
+            @NotNull HttpHeaders headers,
+            @NotNull HttpStatus status,
+            @NotNull WebRequest request) {
+        String error = Objects.requireNonNull(ex.getBindingResult().getFieldError()).getDefaultMessage();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse().setError(error).setCode(getCode(error)));
     }
 }

@@ -2,6 +2,7 @@ package com.sigma.dao.blockchain;
 
 import com.sigma.dao.constant.TendermintQuery;
 import com.sigma.dao.constant.TendermintTransaction;
+import com.sigma.dao.error.exception.ProtocolException;
 import kong.unirest.HttpResponse;
 import kong.unirest.JsonNode;
 import kong.unirest.Unirest;
@@ -52,9 +53,7 @@ public class TendermintClient {
                     .getString("log");
         } catch(Exception e) {
             log.info(response.getBody().toString());
-            log.error(e.getMessage(), e);
-            return new JSONObject()
-                    .put("error", String.format("Unknown error occurred: %s", e.getMessage())).toString();
+            throw new ProtocolException(response.getBody().getObject().optString("error"));
         }
     }
 
@@ -82,9 +81,7 @@ public class TendermintClient {
                     .getString("data")));
         } catch(Exception e) {
             log.info(response.getBody().toString());
-            log.error(e.getMessage(), e);
-            return new JSONObject()
-                    .put("error", String.format("Unknown error occurred: %s", e.getMessage())).toString();
+            throw new ProtocolException(response.getBody().getObject().optString("error"));
         }
     }
 }

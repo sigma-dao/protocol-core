@@ -144,6 +144,7 @@ public class GovernanceService {
             throw new ProtocolException(ErrorCode.E0032);
         }
         governanceActionRepository.save(new GovernanceAction()
+                .setId(uuidUtils.next())
                 .setEntityId(entityId)
                 .setVotesFor(0)
                 .setVotesAgainst(0)
