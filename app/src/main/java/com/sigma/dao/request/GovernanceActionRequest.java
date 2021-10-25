@@ -12,9 +12,9 @@ import javax.validation.constraints.NotNull;
 @Accessors(chain = true)
 public abstract class GovernanceActionRequest extends SignedRequest {
     @NotNull(message = ErrorCode.E0039)
-    protected Long enactmentDate;
+    public Long enactmentDate;
     @NotNull(message = ErrorCode.E0033)
-    protected Long openingDate;
+    public Long openingDate;
     @NotNull(message = ErrorCode.E0034)
-    protected Long closingDate;
+    public Long closingDate;
 }

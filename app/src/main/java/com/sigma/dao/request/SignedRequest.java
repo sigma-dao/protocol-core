@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 @Accessors(chain = true)
 public abstract class SignedRequest {
     @NotNull(message = ErrorCode.E0040)
-    private String signature;
+    public String signature;
     @NotNull(message = ErrorCode.E0041)
-    private String publicKey;
+    public String publicKey;
 }

@@ -3,6 +3,7 @@ package com.sigma.dao.utils;
 import com.sigma.dao.service.NetworkConfigService;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 @Component
@@ -20,7 +21,8 @@ public class UUIDUtils {
      * @return the {@link UUID}
      */
     public UUID next() {
-        UUID uuid = UUID.fromString(networkConfigService.get().getUuidSeed().toString());
+        UUID uuid = UUID.nameUUIDFromBytes(networkConfigService.get().getUuidSeed().toString()
+                .getBytes(StandardCharsets.UTF_8));
         networkConfigService.incrementUuidSeed();
         return uuid;
     }

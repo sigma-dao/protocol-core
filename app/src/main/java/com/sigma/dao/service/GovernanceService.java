@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -71,6 +72,11 @@ public class GovernanceService {
                 .orElseThrow(() -> new ProtocolException(ErrorCode.E0025));
         User user = userRepository.findByPublicKey(request.getPublicKey())
                 .orElseThrow(() -> new ProtocolException(ErrorCode.E0026));
+        Optional<GovernanceVote> voteCheck = governanceVoteRepository
+                .findByUserAndGovernanceAction(user, governanceAction);
+        if(voteCheck.isPresent()) {
+            throw new ProtocolException(ErrorCode.E0042);
+        }
         if(request.getVoteFor()) {
             governanceAction.setVotesFor(governanceAction.getVotesFor() + user.getStake());
         } else {
@@ -81,10 +87,39 @@ public class GovernanceService {
                 .setUser(user)
                 .setTimestamp(networkConfigService.getTimestamp())
                 .setId(uuidUtils.next()));
-        // TODO - check if the governance vote has passed the required threshold
+        resolveGovernanceAction(governanceAction);
         return governanceActionRepository.save(governanceAction);
     }
 
+    /**
+     * Resolve a {@link GovernanceAction} when the voting threshold has passed
+     *
+     * @param governanceAction the {@link GovernanceAction} instance
+     */
+    private void resolveGovernanceAction(
+            final GovernanceAction governanceAction
+    ) {
+        // TODO - resolve the governance action if it passes the required threshold
+        if(governanceAction.getType().equals(GovernanceActionType.CREATE_FUND)) {
+
+        } else if(governanceAction.getType().equals(GovernanceActionType.ADD_ASSET)) {
+
+        } else if(governanceAction.getType().equals(GovernanceActionType.REMOVE_ASSET)) {
+
+        } else if(governanceAction.getType().equals(GovernanceActionType.UPDATE_FUND)) {
+
+        }
+    }
+
+    /**
+     * Create a new {@link GovernanceAction}
+     *
+     * @param entityId the related entity's UUID
+     * @param type the {@link GovernanceActionType}
+     * @param enactmentDate the enactment timestamp
+     * @param openingDate the opening timestamp
+     * @param closingDate the closing timestamp
+     */
     public void create(
             final UUID entityId,
             final GovernanceActionType type,

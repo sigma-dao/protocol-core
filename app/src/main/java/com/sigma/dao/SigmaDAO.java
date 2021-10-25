@@ -2,6 +2,7 @@ package com.sigma.dao;
 
 import com.sigma.dao.grpc.GrpcServer;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,6 +12,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class SigmaDAO implements CommandLineRunner {
 
     private final GrpcServer grpcServer;
+    @Value("${grpc.enabled}")
+    private Boolean grpcEnabled;
 
     public SigmaDAO(GrpcServer grpcServer) {
         this.grpcServer = grpcServer;
@@ -22,7 +25,9 @@ public class SigmaDAO implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        grpcServer.start();
-        grpcServer.blockUntilShutdown();
+        if(grpcEnabled) {
+            grpcServer.start();
+            grpcServer.blockUntilShutdown();
+        }
     }
 }

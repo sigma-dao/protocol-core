@@ -42,7 +42,7 @@ public class GrpcServer {
         }));
     }
 
-    private void stop() {
+    public void stop() {
         server.shutdown();
     }
 

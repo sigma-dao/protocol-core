@@ -28,4 +28,22 @@ public class JSONUtils {
             throw new ProtocolException(e.getMessage());
         }
     }
+
+    /**
+     * Converts JSON string to object
+     *
+     * @param json the JSON string
+     * @param type the target object type
+     *
+     * @param <T> generic type
+     *
+     * @return the object
+     */
+    public <T> T fromJson(String json, Class<T> type) {
+        try {
+            return objectMapper.readValue(json, type);
+        } catch (JsonProcessingException e) {
+            throw new ProtocolException(e.getMessage());
+        }
+    }
 }

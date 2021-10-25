@@ -1,33 +1,35 @@
 package com.sigma.dao.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sigma.dao.blockchain.TendermintClient;
 import com.sigma.dao.constant.TendermintTransaction;
 import com.sigma.dao.request.AddAssetRequest;
-import lombok.SneakyThrows;
+import com.sigma.dao.request.RemoveAssetRequest;
+import com.sigma.dao.utils.JSONUtils;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/asset")
 public class AssetController {
 
     private final TendermintClient tendermintClient;
-    private final ObjectMapper objectMapper;
+    private final JSONUtils jsonUtils;
 
     public AssetController(TendermintClient tendermintClient,
-                           ObjectMapper objectMapper) {
+                           JSONUtils jsonUtils) {
         this.tendermintClient = tendermintClient;
-        this.objectMapper = objectMapper;
+        this.jsonUtils = jsonUtils;
     }
 
-    @SneakyThrows
     @PostMapping
-    public ResponseEntity<String> add(@RequestBody AddAssetRequest request) {
-        return ResponseEntity.ok(tendermintClient.write(
-                TendermintTransaction.ADD_ASSET, objectMapper.writeValueAsString(request)));
+    public ResponseEntity<String> add(@Valid @RequestBody AddAssetRequest request) {
+        return ResponseEntity.ok(tendermintClient.write(TendermintTransaction.ADD_ASSET, jsonUtils.toJson(request)));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<String> remove(@RequestBody RemoveAssetRequest request) {
+        return ResponseEntity.ok(tendermintClient.write(TendermintTransaction.REMOVE_ASSET, jsonUtils.toJson(request)));
     }
 }

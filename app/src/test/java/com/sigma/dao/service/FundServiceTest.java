@@ -5,6 +5,7 @@ import com.sigma.dao.repository.AssetRepository;
 import com.sigma.dao.repository.FundRepository;
 import com.sigma.dao.utils.UUIDUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
@@ -12,6 +13,7 @@ import org.mockito.Mockito;
 import java.util.List;
 import java.util.UUID;
 
+@Ignore
 public class FundServiceTest {
 
     private FundService fundService;

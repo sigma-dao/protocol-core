@@ -1,10 +1,8 @@
 package com.sigma.dao.blockchain;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.protobuf.ByteString;
 import com.sigma.dao.constant.TendermintQuery;
 import com.sigma.dao.constant.TendermintTransaction;
-import com.sigma.dao.error.exception.ProtocolException;
 import com.sigma.dao.service.NetworkConfigService;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
@@ -35,13 +33,9 @@ public class TendermintBlockchain extends tendermint.abci.ABCIApplicationGrpc.AB
     public void initChain(Types.RequestInitChain req, StreamObserver<Types.ResponseInitChain> responseObserver) {
         var resp = Types.ResponseInitChain.newBuilder().build();
         final JSONObject appState = new JSONObject(req.getAppStateBytes().toStringUtf8());
-        try {
-            networkConfigService.initializeNetworkConfig(appState);
-            responseObserver.onNext(resp);
-            responseObserver.onCompleted();
-        } catch (JsonProcessingException e) {
-            responseObserver.onError(new ProtocolException(e.getMessage()));
-        }
+        networkConfigService.initializeNetworkConfig(appState);
+        responseObserver.onNext(resp);
+        responseObserver.onCompleted();
     }
 
     @Override
@@ -97,7 +91,7 @@ public class TendermintBlockchain extends tendermint.abci.ABCIApplicationGrpc.AB
     @Override
     public void commit(Types.RequestCommit req, StreamObserver<Types.ResponseCommit> responseObserver) {
         var resp = Types.ResponseCommit.newBuilder()
-                .setData(ByteString.copyFrom(new byte[8]))
+                .setData(ByteString.copyFrom(new byte[8])) // TODO - this should hash the entire app state (dump from all DB tables sorted by UUID)
                 .build();
         responseObserver.onNext(resp);
         responseObserver.onCompleted();

@@ -1,5 +1,6 @@
 package com.sigma.dao.service;
 
+import com.sigma.dao.constant.Blockchain;
 import com.sigma.dao.constant.GovernanceActionType;
 import com.sigma.dao.constant.GovernanceStatus;
 import com.sigma.dao.error.ErrorCode;
@@ -44,22 +45,13 @@ public class AssetService {
     public Asset add(
             final AddAssetRequest request
     ) {
-        if(request.getBlockchain() == null) {
-            throw new ProtocolException(ErrorCode.E0017);
-        }
-        if(request.getContractAddress() == null) {
-            throw new ProtocolException(ErrorCode.E0018);
-        }
-        if(request.getSymbol() == null) {
-            throw new ProtocolException(ErrorCode.E0019);
-        }
         Optional<Asset> assetOptional = assetRepository.findByBlockchainAndContractAddress(
-                request.getBlockchain(), request.getContractAddress()).stream().findAny();
+                Blockchain.valueOf(request.getBlockchain()), request.getContractAddress()).stream().findAny();
         if(assetOptional.isPresent()) {
             throw new ProtocolException(ErrorCode.E0022);
         }
         Asset asset = new Asset()
-                .setBlockchain(request.getBlockchain())
+                .setBlockchain(Blockchain.valueOf(request.getBlockchain()))
                 .setSymbol(request.getSymbol())
                 .setContractAddress(request.getContractAddress())
                 .setStatus(GovernanceStatus.SUBMITTED)
@@ -80,9 +72,6 @@ public class AssetService {
     public Asset remove(
             final RemoveAssetRequest request
     ) {
-        if(request.getId() == null) {
-            throw new ProtocolException(ErrorCode.E0008);
-        }
         Asset asset = assetRepository.findById(request.getId())
                 .orElseThrow(() -> new ProtocolException(ErrorCode.E0021));
         boolean assetInUse = fundRepository.findBySubscriptionAsset(asset).stream()

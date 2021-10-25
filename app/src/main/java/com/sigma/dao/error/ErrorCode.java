@@ -10,10 +10,10 @@ public final class ErrorCode {
     public static final String E0007 = "Type is a mandatory field.";
     public static final String E0008 = "ID is a mandatory field.";
     public static final String E0009 = "Fund cannot be found with specified ID.";
-    public static final String E0010 = "Fund can only be updated when status = PROPOSED";
-    public static final String E0012 = "Enactment date is a mandatory field.";
+    public static final String E0010 = "---";
+    public static final String E0012 = "---";
     public static final String E0013 = "Enactment date is too soon.";
-    public static final String E0014 = "Fund status cannot be changed.";
+    public static final String E0014 = "---";
     public static final String E0015 = "Unsupported Tendermint transaction.";
     public static final String E0016 = "Unsupported Tendermint query.";
     public static final String E0017 = "Blockchain is a mandatory field.";
@@ -41,4 +41,5 @@ public final class ErrorCode {
     public static final String E0039 = "Enactment date is a mandatory field";
     public static final String E0040 = "Signature is a mandatory field.";
     public static final String E0041 = "Public key is a mandatory field.";
+    public static final String E0042 = "User has already voted on this proposal.";
 }

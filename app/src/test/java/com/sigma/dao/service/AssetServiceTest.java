@@ -1,87 +1,122 @@
 package com.sigma.dao.service;
 
+import com.sigma.dao.SigmaDAO;
 import com.sigma.dao.constant.Blockchain;
 import com.sigma.dao.error.ErrorCode;
-import com.sigma.dao.model.Asset;
-import com.sigma.dao.model.Fund;
-import com.sigma.dao.model.GovernanceAction;
-import com.sigma.dao.repository.AssetRepository;
-import com.sigma.dao.repository.FundRepository;
 import com.sigma.dao.request.AddAssetRequest;
-import com.sigma.dao.utils.UUIDUtils;
+import com.sigma.dao.request.SignedRequest;
+import com.sigma.dao.response.ErrorResponse;
+import com.sigma.dao.utils.JSONUtils;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.mockito.Mockito;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@ActiveProfiles("test")
+@SpringBootTest(classes = SigmaDAO.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@RunWith(SpringRunner.class)
+@AutoConfigureMockMvc
 public class AssetServiceTest {
 
+    @Autowired
     private AssetService assetService;
-    private AssetRepository assetRepository;
-    private FundRepository fundRepository;
-    private GovernanceService governanceService;
-    private UUIDUtils uuidUtils;
+    @Autowired
+    private NetworkConfigService networkConfigService;
+    @Autowired
+    private JSONUtils jsonUtils;
+    @Autowired
+    private MockMvc mockMvc;
 
     @Before
     public void setup() {
-        uuidUtils = Mockito.mock(UUIDUtils.class);
-        fundRepository = Mockito.mock(FundRepository.class);
-        assetRepository = Mockito.mock(AssetRepository.class);
-        governanceService = Mockito.mock(GovernanceService.class);
-        assetService = new AssetService(assetRepository, fundRepository, governanceService, uuidUtils);
+        JSONObject appState = new JSONObject().put("networkConfig",
+                new JSONObject()
+                        .put("governanceTokenAddress", "0x0")
+                        .put("minFundEnactmentDelay", 1)
+                        .put("maxFundEnactmentDelay", 1)
+                        .put("minAssetEnactmentDelay", 1)
+                        .put("maxAssetEnactmentDelay", 1)
+                        .put("uuidSeed", 1));
+        networkConfigService.initializeNetworkConfig(appState);
+    }
+
+    private void testAddAssetMissingField(SignedRequest request, String error) {
+        try {
+            String content = mockMvc.perform(post("/asset")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(jsonUtils.toJson(request))).andExpect(status().is5xxServerError())
+                    .andReturn().getResponse().getContentAsString();
+            ErrorResponse errorResponse = jsonUtils.fromJson(content, ErrorResponse.class);
+            Assertions.assertEquals(errorResponse.getError(), error);
+        } catch (Exception e) {
+            Assertions.fail(e.getMessage());
+        }
     }
 
     @Test
     public void testAddAssetMissingBlockchain() {
-        try {
-            assetService.add(new AddAssetRequest());
-            Assertions.fail();
-        } catch(Exception e) {
-            Assertions.assertEquals(ErrorCode.E0017, e.getMessage());
-        }
+        SignedRequest request = new AddAssetRequest()
+                .setSymbol("BTC")
+                .setContractAddress("0x0")
+                .setClosingDate(1L)
+                .setOpeningDate(1L)
+                .setEnactmentDate(1L)
+                .setPublicKey("0x0")
+                .setSignature("0x0");
+        testAddAssetMissingField(request, ErrorCode.E0017);
     }
 
     @Test
     public void testAddAssetMissingContractAddress() {
-        try {
-            assetService.add(new AddAssetRequest()
-                    .setBlockchain(Blockchain.ETHEREUM));
-            Assertions.fail();
-        } catch(Exception e) {
-            Assertions.assertEquals(ErrorCode.E0018, e.getMessage());
-        }
+        SignedRequest request = new AddAssetRequest()
+                .setSymbol("BTC")
+                .setBlockchain(Blockchain.ETHEREUM.toString())
+                .setClosingDate(1L)
+                .setOpeningDate(1L)
+                .setEnactmentDate(1L)
+                .setPublicKey("0x0")
+                .setSignature("0x0");
+        testAddAssetMissingField(request, ErrorCode.E0018);
     }
 
     @Test
     public void testAddAssetMissingSymbol() {
-        try {
-            assetService.add(new AddAssetRequest()
-                    .setBlockchain(Blockchain.ETHEREUM)
-                    .setContractAddress("0x0"));
-            Assertions.fail();
-        } catch(Exception e) {
-            Assertions.assertEquals(ErrorCode.E0019, e.getMessage());
-        }
+        SignedRequest request = new AddAssetRequest()
+                .setContractAddress("0x0")
+                .setBlockchain(Blockchain.ETHEREUM.toString())
+                .setClosingDate(1L)
+                .setOpeningDate(1L)
+                .setEnactmentDate(1L)
+                .setPublicKey("0x0")
+                .setSignature("0x0");
+        testAddAssetMissingField(request, ErrorCode.E0019);
     }
 
-    @Test
-    public void testAddAssetDuplicated() {
-        Mockito.when(assetRepository.findByBlockchainAndContractAddress(
-                Mockito.any(Blockchain.class), Mockito.any())).thenReturn(List.of(new Asset()));
-        try {
-            assetService.add(new AddAssetRequest()
-                    .setBlockchain(Blockchain.ETHEREUM)
-                    .setContractAddress("0x0")
-                    .setSymbol("XYZ"));
-            Assertions.fail();
-        } catch(Exception e) {
-            Assertions.assertEquals(ErrorCode.E0022, e.getMessage());
-        }
-    }
+//    @Test
+//    public void testAddAssetDuplicated() {
+//        Mockito.when(assetRepository.findByBlockchainAndContractAddress(
+//                Mockito.any(Blockchain.class), Mockito.any())).thenReturn(List.of(new Asset()));
+//        try {
+//            assetService.add(new AddAssetRequest()
+//                    .setBlockchain(Blockchain.ETHEREUM)
+//                    .setContractAddress("0x0")
+//                    .setSymbol("XYZ"));
+//            Assertions.fail();
+//        } catch(Exception e) {
+//            Assertions.assertEquals(ErrorCode.E0022, e.getMessage());
+//        }
+//    }
 
 //    @Test
 //    public void testAddAsset() {

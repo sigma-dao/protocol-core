@@ -1,11 +1,10 @@
 package com.sigma.dao.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sigma.dao.error.ErrorCode;
 import com.sigma.dao.error.exception.ProtocolException;
 import com.sigma.dao.model.NetworkConfig;
 import com.sigma.dao.repository.NetworkConfigRepository;
+import com.sigma.dao.utils.JSONUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -20,19 +19,20 @@ public class NetworkConfigService {
     @Getter
     private Long timestamp;
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-
     private final NetworkConfigRepository networkConfigRepository;
+    private final JSONUtils jsonUtils;
 
-    public NetworkConfigService(NetworkConfigRepository networkConfigRepository) {
+    public NetworkConfigService(NetworkConfigRepository networkConfigRepository,
+                                JSONUtils jsonUtils) {
         this.networkConfigRepository = networkConfigRepository;
+        this.jsonUtils = jsonUtils;
     }
 
     /**
      * Initializes the database with the starting network configuration
      */
-    public void initializeNetworkConfig(JSONObject appState) throws JsonProcessingException {
-        NetworkConfig networkConfig = objectMapper.readValue(
+    public void initializeNetworkConfig(JSONObject appState) {
+        NetworkConfig networkConfig = jsonUtils.fromJson(
                 appState.getJSONObject("networkConfig").toString(), NetworkConfig.class);
         this.networkConfigRepository.save(networkConfig);
     }
